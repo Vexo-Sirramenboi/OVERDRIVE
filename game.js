@@ -16,9 +16,9 @@ import {
 } from "./enemies.js";
 
 
-// ============================================================
-// SCENE
-// ============================================================
+/* ============================================================
+   SCENE
+============================================================ */
 
 const scene =
     new THREE.Scene();
@@ -35,9 +35,9 @@ scene.fog =
     );
 
 
-// ============================================================
-// CAMERA
-// ============================================================
+/* ============================================================
+   CAMERA
+============================================================ */
 
 const camera =
     new THREE.PerspectiveCamera(
@@ -54,21 +54,26 @@ camera.position.set(
 );
 
 
-// ============================================================
-// RENDERER
-// ============================================================
+/* ============================================================
+   RENDERER
+============================================================ */
 
 const renderer =
     new THREE.WebGLRenderer({
+
         antialias: true,
+
         powerPreference:
             "high-performance"
+
     });
+
 
 renderer.setSize(
     innerWidth,
     innerHeight
 );
+
 
 renderer.setPixelRatio(
     Math.min(
@@ -77,11 +82,14 @@ renderer.setPixelRatio(
     )
 );
 
+
 renderer.shadowMap.enabled =
     true;
 
+
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
+
 
 document
     .getElementById("game")
@@ -90,9 +98,9 @@ document
     );
 
 
-// ============================================================
-// CONTROLS
-// ============================================================
+/* ============================================================
+   CONTROLS
+============================================================ */
 
 const controls =
     new PointerLockControls(
@@ -101,9 +109,9 @@ const controls =
     );
 
 
-// ============================================================
-// LIGHT
-// ============================================================
+/* ============================================================
+   LIGHTING
+============================================================ */
 
 scene.add(
 
@@ -122,23 +130,26 @@ const sun =
         2
     );
 
+
 sun.position.set(
     10,
     25,
     10
 );
 
+
 sun.castShadow =
     true;
+
 
 scene.add(
     sun
 );
 
 
-// ============================================================
-// FLOOR
-// ============================================================
+/* ============================================================
+   FLOOR
+============================================================ */
 
 const floor =
     new THREE.Mesh(
@@ -165,20 +176,19 @@ const floor =
 floor.position.y =
     -.5;
 
+
 floor.receiveShadow =
     true;
+
 
 scene.add(
     floor
 );
 
 
-// ============================================================
-// COLLISION OBJECTS
-// ============================================================
-
-const collisionObjects = [];
-
+/* ============================================================
+   LEVEL BLOCKS
+============================================================ */
 
 function block(
     x,
@@ -221,16 +231,12 @@ function block(
     mesh.castShadow =
         true;
 
+
     mesh.receiveShadow =
         true;
 
 
     scene.add(
-        mesh
-    );
-
-
-    collisionObjects.push(
         mesh
     );
 
@@ -311,9 +317,9 @@ block(
 );
 
 
-// ============================================================
-// GRID
-// ============================================================
+/* ============================================================
+   GRID
+============================================================ */
 
 const grid =
     new THREE.GridHelper(
@@ -323,17 +329,19 @@ const grid =
         0x202030
     );
 
+
 grid.position.y =
     .01;
+
 
 scene.add(
     grid
 );
 
 
-// ============================================================
-// PLAYER
-// ============================================================
+/* ============================================================
+   PLAYER
+============================================================ */
 
 const player = {
 
@@ -367,23 +375,23 @@ camera.position.y =
     player.height;
 
 
-// ============================================================
-// INPUT
-// ============================================================
+/* ============================================================
+   INPUT
+============================================================ */
 
 const keys = {};
 
 
 addEventListener(
     "keydown",
-    e => {
+    event => {
 
-        keys[e.code] =
+        keys[event.code] =
             true;
 
 
         if (
-            e.code === "Space" &&
+            event.code === "Space" &&
             player.grounded
         ) {
 
@@ -397,7 +405,7 @@ addEventListener(
 
 
         if (
-            e.code === "KeyQ"
+            event.code === "KeyQ"
         ) {
 
             dash();
@@ -406,7 +414,7 @@ addEventListener(
 
 
         if (
-            e.code === "Digit1"
+            event.code === "Digit1"
         ) {
 
             equip(
@@ -417,7 +425,7 @@ addEventListener(
 
 
         if (
-            e.code === "Digit2"
+            event.code === "Digit2"
         ) {
 
             equip(
@@ -428,7 +436,7 @@ addEventListener(
 
 
         if (
-            e.code === "Digit3"
+            event.code === "Digit3"
         ) {
 
             equip(
@@ -439,7 +447,7 @@ addEventListener(
 
 
         if (
-            e.code === "KeyR"
+            event.code === "KeyR"
         ) {
 
             reload();
@@ -452,27 +460,57 @@ addEventListener(
 
 addEventListener(
     "keyup",
-    e => {
+    event => {
 
-        keys[e.code] =
+        keys[event.code] =
             false;
 
     }
 );
 
 
-// ============================================================
-// WEAPON SYSTEM
-// ============================================================
+/* ============================================================
+   3D WEAPON SYSTEM
+============================================================ */
+
+const weaponView =
+    new THREE.Group();
+
+
+camera.add(
+    weaponView
+);
+
+
+scene.add(
+    camera
+);
+
+
+weaponView.position.set(
+    .55,
+    -.45,
+    -.9
+);
+
+
+weaponView.rotation.set(
+    0,
+    Math.PI,
+    0
+);
+
+
+let currentGun =
+    null;
+
 
 let currentWeapon =
     "revolver";
 
 
 let weapon =
-    weapons[
-        currentWeapon
-    ];
+    weapons[currentWeapon];
 
 
 let canFire =
@@ -483,6 +521,554 @@ let reloading =
     false;
 
 
+let gunKick =
+    0;
+
+
+let gunKickVelocity =
+    0;
+
+
+let gunBobTime =
+    0;
+
+
+/* ============================================================
+   MATERIAL HELPERS
+============================================================ */
+
+function metal(
+    color
+) {
+
+    return new THREE.MeshStandardMaterial({
+
+        color,
+
+        metalness: .9,
+
+        roughness: .25
+
+    });
+
+}
+
+
+function glow(
+    color
+) {
+
+    return new THREE.MeshBasicMaterial({
+
+        color
+
+    });
+
+}
+
+
+/* ============================================================
+   REVOLVER
+============================================================ */
+
+function createRevolver() {
+
+    const gun =
+        new THREE.Group();
+
+
+    const body =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .55,
+                .35,
+                .9
+            ),
+
+            metal(
+                0x292932
+            )
+
+        );
+
+
+    gun.add(body);
+
+
+    const barrel =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .075,
+                .075,
+                1.2,
+                12
+            ),
+
+            metal(
+                0x111116
+            )
+
+        );
+
+
+    barrel.rotation.x =
+        Math.PI / 2;
+
+
+    barrel.position.z =
+        -.85;
+
+
+    gun.add(barrel);
+
+
+    const cylinder =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .25,
+                .25,
+                .32,
+                12
+            ),
+
+            metal(
+                0x15151b
+            )
+
+        );
+
+
+    cylinder.rotation.z =
+        Math.PI / 2;
+
+
+    cylinder.position.z =
+        -.15;
+
+
+    gun.add(cylinder);
+
+
+    const energy =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .08,
+                .08,
+                .75
+            ),
+
+            glow(
+                0x00ffff
+            )
+
+        );
+
+
+    energy.position.set(
+        0,
+        .19,
+        -.15
+    );
+
+
+    gun.add(energy);
+
+
+    const grip =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .3,
+                .75,
+                .3
+            ),
+
+            metal(
+                0x101016
+            )
+
+        );
+
+
+    grip.position.set(
+        0,
+        -.45,
+        .2
+    );
+
+
+    grip.rotation.z =
+        THREE.MathUtils.degToRad(
+            -12
+        );
+
+
+    gun.add(grip);
+
+
+    return gun;
+}
+
+
+/* ============================================================
+   SHOTGUN
+============================================================ */
+
+function createShotgun() {
+
+    const gun =
+        new THREE.Group();
+
+
+    const body =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .65,
+                .45,
+                1.25
+            ),
+
+            metal(
+                0x28282f
+            )
+
+        );
+
+
+    gun.add(body);
+
+
+    for (
+        let i = 0;
+        i < 2;
+        i++
+    ) {
+
+        const barrel =
+            new THREE.Mesh(
+
+                new THREE.CylinderGeometry(
+                    .095,
+                    .095,
+                    1.7,
+                    12
+                ),
+
+                metal(
+                    0x111116
+                )
+
+            );
+
+
+        barrel.rotation.x =
+            Math.PI / 2;
+
+
+        barrel.position.set(
+            i === 0
+                ? -.16
+                : .16,
+
+            .08,
+
+            -1.25
+        );
+
+
+        gun.add(
+            barrel
+        );
+
+    }
+
+
+    const pump =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .72,
+                .2,
+                .55
+            ),
+
+            metal(
+                0x111116
+            )
+
+        );
+
+
+    pump.position.set(
+        0,
+        -.05,
+        -.8
+    );
+
+
+    gun.add(pump);
+
+
+    const grip =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .35,
+                .8,
+                .35
+            ),
+
+            metal(
+                0x101016
+            )
+
+        );
+
+
+    grip.position.set(
+        0,
+        -.55,
+        .3
+    );
+
+
+    grip.rotation.z =
+        THREE.MathUtils.degToRad(
+            -10
+        );
+
+
+    gun.add(grip);
+
+
+    const glowBar =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .08,
+                .08,
+                .7
+            ),
+
+            glow(
+                0xffaa00
+            )
+
+        );
+
+
+    glowBar.position.set(
+        0,
+        .25,
+        -.35
+    );
+
+
+    gun.add(
+        glowBar
+    );
+
+
+    return gun;
+}
+
+
+/* ============================================================
+   ROCKET LAUNCHER
+============================================================ */
+
+function createRocketLauncher() {
+
+    const gun =
+        new THREE.Group();
+
+
+    const body =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .8,
+                .7,
+                1.5
+            ),
+
+            metal(
+                0x25252e
+            )
+
+        );
+
+
+    gun.add(body);
+
+
+    const barrel =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .32,
+                .28,
+                1.5,
+                16
+            ),
+
+            metal(
+                0x111116
+            )
+
+        );
+
+
+    barrel.rotation.x =
+        Math.PI / 2;
+
+
+    barrel.position.z =
+        -1.35;
+
+
+    gun.add(barrel);
+
+
+    const inner =
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .21,
+                .21,
+                .05,
+                16
+            ),
+
+            glow(
+                0xff174f
+            )
+
+        );
+
+
+    inner.rotation.x =
+        Math.PI / 2;
+
+
+    inner.position.z =
+        -2.1;
+
+
+    gun.add(inner);
+
+
+    const grip =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .4,
+                .85,
+                .4
+            ),
+
+            metal(
+                0x101016
+            )
+
+        );
+
+
+    grip.position.set(
+        0,
+        -.65,
+        .3
+    );
+
+
+    grip.rotation.z =
+        THREE.MathUtils.degToRad(
+            -8
+        );
+
+
+    gun.add(grip);
+
+
+    const energy =
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .1,
+                .1,
+                1
+            ),
+
+            glow(
+                0xff174f
+            )
+
+        );
+
+
+    energy.position.y =
+        .38;
+
+
+    energy.position.z =
+        -.2;
+
+
+    gun.add(
+        energy
+    );
+
+
+    return gun;
+}
+
+
+/* ============================================================
+   CREATE WEAPON
+============================================================ */
+
+function createWeaponModel(
+    name
+) {
+
+    if (
+        name === "revolver"
+    ) {
+
+        return createRevolver();
+
+    }
+
+
+    if (
+        name === "shotgun"
+    ) {
+
+        return createShotgun();
+
+    }
+
+
+    if (
+        name === "rocket"
+    ) {
+
+        return createRocketLauncher();
+
+    }
+
+}
+
+
+/* ============================================================
+   EQUIP
+============================================================ */
+
 function equip(
     name
 ) {
@@ -492,6 +1078,18 @@ function equip(
     ) {
 
         return;
+
+    }
+
+
+    if (
+        currentGun
+    ) {
+
+        weaponView.remove(
+            currentGun
+        );
+
     }
 
 
@@ -503,10 +1101,31 @@ function equip(
         weapons[name];
 
 
+    currentGun =
+        createWeaponModel(
+            weapon.model
+        );
+
+
+    weaponView.add(
+        currentGun
+    );
+
+
     updateWeaponHUD();
+
+
+    // Small weapon swap animation
+
+    weaponView.position.z =
+        -.65;
 
 }
 
+
+/* ============================================================
+   WEAPON HUD
+============================================================ */
 
 function updateWeaponHUD() {
 
@@ -528,6 +1147,10 @@ function updateWeaponHUD() {
 }
 
 
+/* ============================================================
+   RELOAD
+============================================================ */
+
 function reload() {
 
     if (
@@ -538,11 +1161,24 @@ function reload() {
     ) {
 
         return;
+
     }
 
 
     reloading =
         true;
+
+
+    const oldName =
+        weapon.name;
+
+
+    document
+        .getElementById(
+            "weaponName"
+        )
+        .textContent =
+        "RELOADING...";
 
 
     setTimeout(
@@ -582,16 +1218,16 @@ function reload() {
 }
 
 
-// ============================================================
-// SHOOT
-// ============================================================
+/* ============================================================
+   SHOOT
+============================================================ */
 
 addEventListener(
     "mousedown",
-    e => {
+    event => {
 
         if (
-            e.button === 0 &&
+            event.button === 0 &&
             controls.isLocked &&
             player.alive
         ) {
@@ -612,6 +1248,7 @@ function shoot() {
     ) {
 
         return;
+
     }
 
 
@@ -622,10 +1259,12 @@ function shoot() {
         reload();
 
         return;
+
     }
 
 
     weapon.ammo--;
+
 
     updateWeaponHUD();
 
@@ -641,31 +1280,29 @@ function shoot() {
                 true;
 
         },
-        weapon.fireRate *
-        1000
+        weapon.fireRate * 1000
     );
 
 
-    // RECOIL
+    // GUN-ONLY RECOIL
 
-    camera.rotation.x +=
-        THREE.MathUtils.degToRad(
-            weapon.recoil
-        );
+    gunKick =
+        .08 +
+        weapon.recoil *
+        .045;
 
 
-    // MUZZLE FLASH
+    gunKickVelocity =
+        weapon.recoil *
+        .12;
+
 
     muzzleFlash();
 
 
-    // PELLETS
-
     for (
         let i = 0;
-
         i < weapon.pellets;
-
         i++
     ) {
 
@@ -688,9 +1325,9 @@ function shoot() {
 }
 
 
-// ============================================================
-// RAYCAST
-// ============================================================
+/* ============================================================
+   RAYCAST
+============================================================ */
 
 function fireRay() {
 
@@ -703,19 +1340,28 @@ function fireRay() {
     );
 
 
-    // SPREAD
-
     direction.x +=
-        (Math.random() - .5)
-        * weapon.spread;
+        (
+            Math.random() -
+            .5
+        ) *
+        weapon.spread;
+
 
     direction.y +=
-        (Math.random() - .5)
-        * weapon.spread;
+        (
+            Math.random() -
+            .5
+        ) *
+        weapon.spread;
+
 
     direction.z +=
-        (Math.random() - .5)
-        * weapon.spread;
+        (
+            Math.random() -
+            .5
+        ) *
+        weapon.spread;
 
 
     direction.normalize();
@@ -742,6 +1388,7 @@ function fireRay() {
         ) {
 
             continue;
+
         }
 
 
@@ -793,6 +1440,7 @@ function fireRay() {
                 hits[0].point
             );
 
+
             hitmarker();
 
         }
@@ -802,9 +1450,9 @@ function fireRay() {
 }
 
 
-// ============================================================
-// ENEMY DAMAGE
-// ============================================================
+/* ============================================================
+   ENEMY DAMAGE
+============================================================ */
 
 function damageEnemy(
     enemy,
@@ -817,6 +1465,7 @@ function damageEnemy(
     ) {
 
         return;
+
     }
 
 
@@ -824,27 +1473,33 @@ function damageEnemy(
         amount;
 
 
-    // KNOCKBACK
-
     const push =
         new THREE.Vector3();
+
 
     push.subVectors(
         enemy.mesh.position,
         camera.position
     );
 
+
     push.y = 0;
 
-    push.normalize();
 
+    if (
+        push.lengthSq() > 0
+    ) {
 
-    enemy.mesh.position.addScaledVector(
-        push,
-        weapon.explosive
-            ? 2
-            : .5
-    );
+        push.normalize();
+
+        enemy.mesh.position.addScaledVector(
+            push,
+            weapon.explosive
+                ? 2
+                : .5
+        );
+
+    }
 
 
     blood(
@@ -859,6 +1514,7 @@ function damageEnemy(
         explosion(
             position
         );
+
 
         explosionDamage(
             position
@@ -880,9 +1536,9 @@ function damageEnemy(
 }
 
 
-// ============================================================
-// EXPLOSION DAMAGE
-// ============================================================
+/* ============================================================
+   EXPLOSION DAMAGE
+============================================================ */
 
 function explosionDamage(
     position
@@ -897,6 +1553,7 @@ function explosionDamage(
         ) {
 
             continue;
+
         }
 
 
@@ -942,9 +1599,9 @@ function explosionDamage(
 }
 
 
-// ============================================================
-// KILL
-// ============================================================
+/* ============================================================
+   KILLS
+============================================================ */
 
 let kills =
     0;
@@ -959,6 +1616,7 @@ function kill(
     ) {
 
         return;
+
     }
 
 
@@ -1004,9 +1662,9 @@ function kill(
 }
 
 
-// ============================================================
-// EXPLOSION
-// ============================================================
+/* ============================================================
+   EXPLOSION
+============================================================ */
 
 function explosion(
     position
@@ -1088,8 +1746,7 @@ function explosion(
 
 
         light.intensity =
-            40 *
-            (1 - t);
+            40 * (1 - t);
 
 
         if (
@@ -1100,11 +1757,14 @@ function explosion(
                 sphere
             );
 
+
             scene.remove(
                 light
             );
 
+
             return;
+
         }
 
 
@@ -1120,9 +1780,9 @@ function explosion(
 }
 
 
-// ============================================================
-// BLOOD
-// ============================================================
+/* ============================================================
+   BLOOD PARTICLES
+============================================================ */
 
 function blood(
     position
@@ -1165,11 +1825,17 @@ function blood(
         const velocity =
             new THREE.Vector3(
 
-                (Math.random()-.5)*6,
+                (
+                    Math.random() -
+                    .5
+                ) * 6,
 
-                Math.random()*5,
+                Math.random() * 5,
 
-                (Math.random()-.5)*6
+                (
+                    Math.random() -
+                    .5
+                ) * 6
 
             );
 
@@ -1209,6 +1875,7 @@ function blood(
                 );
 
                 return;
+
             }
 
 
@@ -1226,26 +1893,37 @@ function blood(
 }
 
 
-// ============================================================
-// MUZZLE FLASH
-// ============================================================
+/* ============================================================
+   MUZZLE FLASH
+============================================================ */
 
 function muzzleFlash() {
+
+    if (
+        !currentGun
+    ) {
+
+        return;
+
+    }
+
 
     const light =
         new THREE.PointLight(
             weapon.color,
-            45,
-            10
+            30,
+            8
         );
 
 
-    light.position.copy(
-        camera.position
+    light.position.set(
+        0,
+        0,
+        -1.8
     );
 
 
-    scene.add(
+    currentGun.add(
         light
     );
 
@@ -1253,7 +1931,7 @@ function muzzleFlash() {
     setTimeout(
         () => {
 
-            scene.remove(
+            currentGun?.remove(
                 light
             );
 
@@ -1264,17 +1942,16 @@ function muzzleFlash() {
 }
 
 
-// ============================================================
-// HITMARKER
-// ============================================================
+/* ============================================================
+   HITMARKER
+============================================================ */
 
 function hitmarker() {
 
     const element =
-        document
-            .getElementById(
-                "hitmarker"
-            );
+        document.getElementById(
+            "hitmarker"
+        );
 
 
     element.style.transform =
@@ -1291,6 +1968,7 @@ function hitmarker() {
             element.style.transform =
                 "translate(-50%,-50%) scale(0)";
 
+
             element.style.opacity =
                 "0";
 
@@ -1301,9 +1979,118 @@ function hitmarker() {
 }
 
 
-// ============================================================
-// DASH
-// ============================================================
+/* ============================================================
+   GUN ANIMATION
+============================================================ */
+
+function updateGun(
+    delta
+) {
+
+    if (
+        !currentGun
+    ) {
+
+        return;
+
+    }
+
+
+    // Recover recoil smoothly
+
+    gunKick =
+        THREE.MathUtils.lerp(
+            gunKick,
+            0,
+            14 * delta
+        );
+
+
+    gunKickVelocity =
+        THREE.MathUtils.lerp(
+            gunKickVelocity,
+            0,
+            10 * delta
+        );
+
+
+    // Movement bob
+
+    const moving =
+        keys["KeyW"] ||
+        keys["KeyA"] ||
+        keys["KeyS"] ||
+        keys["KeyD"];
+
+
+    if (
+        moving &&
+        controls.isLocked
+    ) {
+
+        gunBobTime +=
+            delta * 10;
+
+    } else {
+
+        gunBobTime =
+            THREE.MathUtils.lerp(
+                gunBobTime,
+                0,
+                5 * delta
+            );
+
+    }
+
+
+    const bobX =
+        Math.sin(
+            gunBobTime
+        ) * .018;
+
+
+    const bobY =
+        Math.abs(
+            Math.cos(
+                gunBobTime
+            )
+        ) * .018;
+
+
+    // Base position
+
+    weaponView.position.x =
+        .55 +
+        bobX;
+
+
+    weaponView.position.y =
+        -.45 +
+        bobY;
+
+
+    weaponView.position.z =
+        -.9 +
+        gunKick;
+
+
+    // Recoil is ONLY on gun
+
+    weaponView.rotation.x =
+        gunKick *
+        1.8;
+
+
+    weaponView.rotation.z =
+        bobX *
+        1.5;
+
+}
+
+
+/* ============================================================
+   DASH
+============================================================ */
 
 function dash() {
 
@@ -1313,6 +2100,7 @@ function dash() {
     ) {
 
         return;
+
     }
 
 
@@ -1327,7 +2115,14 @@ function dash() {
 
     direction.y = 0;
 
-    direction.normalize();
+
+    if (
+        direction.lengthSq() > 0
+    ) {
+
+        direction.normalize();
+
+    }
 
 
     player.velocity.addScaledVector(
@@ -1353,9 +2148,9 @@ function dash() {
 }
 
 
-// ============================================================
-// MOVEMENT
-// ============================================================
+/* ============================================================
+   PLAYER MOVEMENT
+============================================================ */
 
 function moveToward(
     current,
@@ -1370,6 +2165,7 @@ function moveToward(
     ) {
 
         return target;
+
     }
 
 
@@ -1388,6 +2184,7 @@ function updatePlayer(
 
     let forward =
         0;
+
 
     let right =
         0;
@@ -1424,16 +2221,16 @@ function updatePlayer(
 
 
     const speed =
-        sprint
+        sprint &&
+        player.stamina > 0
             ? player.sprintSpeed
             : player.speed;
 
 
-    // STAMINA
-
     if (
         sprint &&
-        moving
+        moving &&
+        player.stamina > 0
     ) {
 
         player.stamina -=
@@ -1455,8 +2252,6 @@ function updatePlayer(
         );
 
 
-    // CAMERA DIRECTION
-
     const forwardVector =
         new THREE.Vector3();
 
@@ -1469,7 +2264,14 @@ function updatePlayer(
     forwardVector.y =
         0;
 
-    forwardVector.normalize();
+
+    if (
+        forwardVector.lengthSq()
+    ) {
+
+        forwardVector.normalize();
+
+    }
 
 
     const rightVector =
@@ -1550,13 +2352,9 @@ function updatePlayer(
     }
 
 
-    // GRAVITY
-
     player.velocity.y -=
         32 * delta;
 
-
-    // POSITION
 
     camera.position.add(
         player.velocity
@@ -1567,8 +2365,6 @@ function updatePlayer(
     );
 
 
-    // GROUND
-
     if (
         camera.position.y <=
         player.height
@@ -1577,8 +2373,10 @@ function updatePlayer(
         camera.position.y =
             player.height;
 
+
         player.velocity.y =
             0;
+
 
         player.grounded =
             true;
@@ -1590,8 +2388,6 @@ function updatePlayer(
 
     }
 
-
-    // BOUNDS
 
     camera.position.x =
         THREE.MathUtils.clamp(
@@ -1609,8 +2405,6 @@ function updatePlayer(
         );
 
 
-    // HUD
-
     document
         .getElementById(
             "staminaBar"
@@ -1621,15 +2415,16 @@ function updatePlayer(
 }
 
 
-// ============================================================
-// SPAWN
-// ============================================================
+/* ============================================================
+   SPAWN
+============================================================ */
 
 function spawnEnemy() {
 
     const alive =
         enemies.filter(
-            e => e.alive
+            enemy =>
+                enemy.alive
         ).length;
 
 
@@ -1638,6 +2433,7 @@ function spawnEnemy() {
     ) {
 
         return;
+
     }
 
 
@@ -1689,9 +2485,9 @@ for (
 }
 
 
-// ============================================================
-// DAMAGE PLAYER
-// ============================================================
+/* ============================================================
+   PLAYER DAMAGE
+============================================================ */
 
 function damagePlayer(
     amount
@@ -1702,6 +2498,7 @@ function damagePlayer(
     ) {
 
         return;
+
     }
 
 
@@ -1754,7 +2551,9 @@ function damagePlayer(
         player.alive =
             false;
 
+
         controls.unlock();
+
 
         document
             .getElementById(
@@ -1768,9 +2567,9 @@ function damagePlayer(
 }
 
 
-// ============================================================
-// START / PAUSE
-// ============================================================
+/* ============================================================
+   START / PAUSE
+============================================================ */
 
 const startScreen =
     document.getElementById(
@@ -1821,6 +2620,7 @@ controls.addEventListener(
         startScreen.style.display =
             "none";
 
+
         pauseScreen.style.display =
             "none";
 
@@ -1845,9 +2645,9 @@ controls.addEventListener(
 );
 
 
-// ============================================================
-// RESIZE
-// ============================================================
+/* ============================================================
+   RESIZE
+============================================================ */
 
 addEventListener(
     "resize",
@@ -1870,9 +2670,18 @@ addEventListener(
 );
 
 
-// ============================================================
-// GAME LOOP
-// ============================================================
+/* ============================================================
+   INITIAL WEAPON
+============================================================ */
+
+equip(
+    "revolver"
+);
+
+
+/* ============================================================
+   GAME LOOP
+============================================================ */
 
 const clock =
     new THREE.Clock();
@@ -1902,6 +2711,11 @@ function animate() {
         );
 
 
+        updateGun(
+            delta
+        );
+
+
         updateEnemies(
             delta,
             camera,
@@ -1916,6 +2730,11 @@ function animate() {
             scene,
             damagePlayer
         );
+
+    } else {
+
+        // Keep weapon animation alive
+        updateGun(delta);
 
     }
 

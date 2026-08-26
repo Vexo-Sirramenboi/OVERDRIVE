@@ -30,24 +30,22 @@
         }
 
         #game {
-            width: 100vw;
-            height: 100vh;
+            position: fixed;
+            inset: 0;
         }
 
         canvas {
             display: block;
         }
 
-        /* =========================
-           CROSSHAIR
-        ========================= */
+        /* CROSSHAIR */
 
         #crosshair {
             position: fixed;
             left: 50%;
             top: 50%;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 10;
@@ -65,21 +63,19 @@
 
         #crosshair::before {
             width: 2px;
-            height: 22px;
-            left: 10px;
+            height: 20px;
+            left: 9px;
             top: 0;
         }
 
         #crosshair::after {
-            width: 22px;
+            width: 20px;
             height: 2px;
             left: 0;
-            top: 10px;
+            top: 9px;
         }
 
-        /* =========================
-           HUD
-        ========================= */
+        /* HUD */
 
         #hud {
             position: fixed;
@@ -91,26 +87,25 @@
         }
 
         #health {
+            color: #ff3155;
             font-size: 34px;
             font-weight: 900;
-            color: #ff3155;
             text-shadow:
                 0 0 8px #ff3155,
-                0 0 20px rgba(255, 0, 60, 0.5);
+                0 0 20px rgba(255, 0, 60, 0.6);
         }
 
         #healthLabel {
-            font-size: 11px;
-            letter-spacing: 4px;
             color: #aaa;
-            margin-top: -5px;
+            font-size: 10px;
+            letter-spacing: 4px;
         }
 
         #staminaContainer {
-            margin-top: 12px;
             width: 220px;
             height: 8px;
-            background: #16161d;
+            margin-top: 12px;
+            background: #17171e;
             border: 1px solid #444;
         }
 
@@ -123,52 +118,67 @@
                 0 0 18px rgba(0, 234, 255, 0.5);
         }
 
-        /* =========================
-           START SCREEN
-        ========================= */
+        /* START SCREEN */
 
         #startScreen {
             position: fixed;
             inset: 0;
+            z-index: 50;
+
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            z-index: 50;
+
+            cursor: pointer;
+
             background:
                 radial-gradient(
                     circle at center,
-                    rgba(0, 100, 140, 0.16),
-                    rgba(0, 0, 0, 0.92) 65%
+                    rgba(0, 100, 140, 0.15),
+                    rgba(0, 0, 0, 0.94) 70%
                 );
-            cursor: pointer;
         }
 
         #title {
             margin: 0;
+
             color: white;
-            font-size: clamp(55px, 10vw, 130px);
+
+            font-size:
+                clamp(55px, 10vw, 130px);
+
             font-weight: 1000;
+
             letter-spacing: 18px;
+
             text-shadow:
                 0 0 10px #00ffff,
-                0 0 30px #00aaff,
+                0 0 30px #0088ff,
                 0 0 70px rgba(0, 150, 255, 0.7);
         }
 
         #subtitle {
-            margin-top: 12px;
+            margin-top: 10px;
+
             color: #00eaff;
-            letter-spacing: 7px;
+
             font-size: 13px;
+
+            letter-spacing: 7px;
         }
 
         #clickText {
             margin-top: 55px;
+
             color: white;
-            letter-spacing: 5px;
+
             font-size: 14px;
-            animation: pulse 1.2s infinite alternate;
+
+            letter-spacing: 5px;
+
+            animation:
+                pulse 1.2s infinite alternate;
         }
 
         @keyframes pulse {
@@ -181,56 +191,55 @@
             }
         }
 
-        /* =========================
-           PAUSE
-        ========================= */
+        /* PAUSE */
 
         #pauseScreen {
             position: fixed;
             inset: 0;
+
+            z-index: 40;
+
             display: none;
+
             align-items: center;
             justify-content: center;
+
             flex-direction: column;
-            z-index: 40;
-            background: rgba(0, 0, 0, 0.65);
+
+            background:
+                rgba(0, 0, 0, 0.65);
+
             backdrop-filter: blur(5px);
+
             pointer-events: none;
         }
 
         #pauseScreen h2 {
-            color: white;
-            font-size: 50px;
-            letter-spacing: 10px;
             margin: 0;
+
+            color: white;
+
+            font-size: 55px;
+
+            letter-spacing: 10px;
         }
 
         #pauseScreen p {
             color: #888;
+
             letter-spacing: 3px;
         }
 
-        /* =========================
-           DAMAGE FLASH
-        ========================= */
-
-        #damageFlash {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 0, 30, 0);
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        /* =========================
-           VIGNETTE
-        ========================= */
+        /* VIGNETTE */
 
         #vignette {
             position: fixed;
             inset: 0;
-            pointer-events: none;
+
             z-index: 5;
+
+            pointer-events: none;
+
             background:
                 radial-gradient(
                     circle,
@@ -238,38 +247,76 @@
                     rgba(0, 0, 0, 0.55) 100%
                 );
         }
+
+        /* DAMAGE */
+
+        #damageFlash {
+            position: fixed;
+            inset: 0;
+
+            z-index: 20;
+
+            pointer-events: none;
+
+            background:
+                rgba(255, 0, 30, 0);
+        }
     </style>
 </head>
 
 <body>
 
-    <div id="game"></div>
+<div id="game"></div>
 
-    <div id="crosshair"></div>
+<div id="crosshair"></div>
 
-    <div id="vignette"></div>
+<div id="vignette"></div>
 
-    <div id="damageFlash"></div>
+<div id="damageFlash"></div>
 
-    <div id="hud">
-        <div id="health">100</div>
-        <div id="healthLabel">INTEGRITY</div>
+<div id="hud">
 
-        <div id="staminaContainer">
-            <div id="staminaBar"></div>
-        </div>
+    <div id="health">
+        100
     </div>
 
-    <div id="startScreen">
-        <h1 id="title">OVERDRIVE</h1>
-        <div id="subtitle">COMBAT SYSTEM ONLINE</div>
-        <div id="clickText">CLICK TO ENTER</div>
+    <div id="healthLabel">
+        INTEGRITY
     </div>
 
-    <div id="pauseScreen">
-        <h2>PAUSED</h2>
-        <p>CLICK TO RETURN</p>
+    <div id="staminaContainer">
+        <div id="staminaBar"></div>
     </div>
+
+</div>
+
+<div id="startScreen">
+
+    <h1 id="title">
+        OVERDRIVE
+    </h1>
+
+    <div id="subtitle">
+        COMBAT SYSTEM ONLINE
+    </div>
+
+    <div id="clickText">
+        CLICK TO ENTER
+    </div>
+
+</div>
+
+<div id="pauseScreen">
+
+    <h2>
+        PAUSED
+    </h2>
+
+    <p>
+        CLICK TO RETURN
+    </p>
+
+</div>
 
 
 <script type="module">
@@ -282,13 +329,16 @@ import {
 
 
 // ============================================================
-// GAME SETUP
+// SCENE
 // ============================================================
 
-const scene = new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
 scene.background =
-    new THREE.Color(0x050509);
+    new THREE.Color(
+        0x050509
+    );
 
 scene.fog =
     new THREE.FogExp2(
@@ -297,14 +347,18 @@ scene.fog =
     );
 
 
+// ============================================================
+// CAMERA
+// ============================================================
+
 const camera =
     new THREE.PerspectiveCamera(
         90,
-        window.innerWidth / window.innerHeight,
+        window.innerWidth /
+        window.innerHeight,
         0.05,
         500
     );
-
 
 camera.position.set(
     0,
@@ -313,12 +367,16 @@ camera.position.set(
 );
 
 
+// ============================================================
+// RENDERER
+// ============================================================
+
 const renderer =
     new THREE.WebGLRenderer({
         antialias: true,
-        powerPreference: "high-performance"
+        powerPreference:
+            "high-performance"
     });
-
 
 renderer.setSize(
     window.innerWidth,
@@ -332,19 +390,20 @@ renderer.setPixelRatio(
     )
 );
 
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled =
+    true;
 
 renderer.shadowMap.type =
     THREE.PCFSoftShadowMap;
 
-
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
 
-
 document
     .getElementById("game")
-    .appendChild(renderer.domElement);
+    .appendChild(
+        renderer.domElement
+    );
 
 
 // ============================================================
@@ -369,7 +428,9 @@ const ambient =
         1.5
     );
 
-scene.add(ambient);
+scene.add(
+    ambient
+);
 
 
 const sun =
@@ -386,10 +447,15 @@ sun.position.set(
 
 sun.castShadow = true;
 
-sun.shadow.mapSize.width = 2048;
-sun.shadow.mapSize.height = 2048;
+sun.shadow.mapSize.width =
+    2048;
 
-scene.add(sun);
+sun.shadow.mapSize.height =
+    2048;
+
+scene.add(
+    sun
+);
 
 
 // ============================================================
@@ -414,20 +480,27 @@ const floor =
         floorMaterial
     );
 
+floor.position.y =
+    -0.5;
 
-floor.position.y = -0.5;
+floor.receiveShadow =
+    true;
 
-floor.receiveShadow = true;
-
-scene.add(floor);
+scene.add(
+    floor
+);
 
 
 // ============================================================
-// WALLS
+// COLLISION OBJECTS
 // ============================================================
 
 const collisionObjects = [];
 
+
+// ============================================================
+// WALL FUNCTION
+// ============================================================
 
 function createWall(
     x,
@@ -464,17 +537,28 @@ function createWall(
     );
 
 
-    wall.castShadow = true;
-    wall.receiveShadow = true;
+    wall.castShadow =
+        true;
+
+    wall.receiveShadow =
+        true;
 
 
-    scene.add(wall);
+    scene.add(
+        wall
+    );
 
-    collisionObjects.push(wall);
+
+    collisionObjects.push(
+        wall
+    );
+
 
     return wall;
 }
 
+
+// Arena boundaries
 
 createWall(
     0,
@@ -514,7 +598,7 @@ createWall(
 
 
 // ============================================================
-// ARENA BLOCKS
+// BLOCK FUNCTION
 // ============================================================
 
 function createBlock(
@@ -553,17 +637,28 @@ function createBlock(
     );
 
 
-    block.castShadow = true;
-    block.receiveShadow = true;
+    block.castShadow =
+        true;
+
+    block.receiveShadow =
+        true;
 
 
-    scene.add(block);
+    scene.add(
+        block
+    );
 
-    collisionObjects.push(block);
+
+    collisionObjects.push(
+        block
+    );
+
 
     return block;
 }
 
+
+// Arena structures
 
 createBlock(
     -13,
@@ -574,7 +669,6 @@ createBlock(
     8
 );
 
-
 createBlock(
     13,
     3,
@@ -584,7 +678,6 @@ createBlock(
     8
 );
 
-
 createBlock(
     -15,
     2,
@@ -593,7 +686,6 @@ createBlock(
     4,
     6
 );
-
 
 createBlock(
     15,
@@ -617,10 +709,12 @@ const grid =
         0x202030
     );
 
+grid.position.y =
+    0.015;
 
-grid.position.y = 0.015;
-
-scene.add(grid);
+scene.add(
+    grid
+);
 
 
 // ============================================================
@@ -649,7 +743,9 @@ function createNeon(
     );
 
 
-    scene.add(light);
+    scene.add(
+        light
+    );
 
 
     const orb =
@@ -670,7 +766,9 @@ function createNeon(
     );
 
 
-    scene.add(orb);
+    scene.add(
+        orb
+    );
 }
 
 
@@ -714,7 +812,7 @@ const player = {
     velocity:
         new THREE.Vector3(),
 
-    moveSpeed: 20,
+    groundSpeed: 20,
 
     sprintSpeed: 32,
 
@@ -732,7 +830,9 @@ const player = {
 
     dashCooldown: false,
 
-    bobTime: 0
+    bobTime: 0,
+
+    wasMoving: false
 };
 
 
@@ -751,8 +851,11 @@ document.addEventListener(
     "keydown",
     event => {
 
-        keys[event.code] = true;
+        keys[event.code] =
+            true;
 
+
+        // Jump
 
         if (
             event.code === "Space" &&
@@ -762,25 +865,18 @@ document.addEventListener(
             player.velocity.y =
                 player.jumpPower;
 
-            player.grounded = false;
+            player.grounded =
+                false;
         }
 
+
+        // Dash
 
         if (
             event.code === "KeyQ"
         ) {
 
             dash();
-        }
-
-
-        if (
-            event.code === "Escape"
-        ) {
-
-            if (controls.isLocked) {
-                controls.unlock();
-            }
         }
 
     }
@@ -791,14 +887,14 @@ document.addEventListener(
     "keyup",
     event => {
 
-        keys[event.code] = false;
-
+        keys[event.code] =
+            false;
     }
 );
 
 
 // ============================================================
-// START GAME
+// START SCREEN
 // ============================================================
 
 const startScreen =
@@ -814,6 +910,16 @@ const pauseScreen =
 
 
 startScreen.addEventListener(
+    "click",
+    () => {
+
+        controls.lock();
+
+    }
+);
+
+
+pauseScreen.addEventListener(
     "click",
     () => {
 
@@ -847,18 +953,7 @@ controls.addEventListener(
 
             pauseScreen.style.display =
                 "flex";
-
         }
-
-    }
-);
-
-
-pauseScreen.addEventListener(
-    "click",
-    () => {
-
-        controls.lock();
 
     }
 );
@@ -893,21 +988,30 @@ function dash() {
     direction.normalize();
 
 
-    player.velocity.add(
-        direction.multiplyScalar(
-            player.dashPower
-        )
+    /*
+        Add momentum rather than
+        completely replacing velocity.
+    */
+
+    player.velocity.addScaledVector(
+        direction,
+        player.dashPower
     );
 
 
-    player.canDash = false;
+    player.canDash =
+        false;
 
-    player.dashCooldown = true;
+    player.dashCooldown =
+        true;
 
 
     setTimeout(
         () => {
-            player.canDash = true;
+
+            player.canDash =
+                true;
+
         },
         650
     );
@@ -915,7 +1019,10 @@ function dash() {
 
     setTimeout(
         () => {
-            player.dashCooldown = false;
+
+            player.dashCooldown =
+                false;
+
         },
         200
     );
@@ -923,7 +1030,7 @@ function dash() {
 
 
 // ============================================================
-// PLAYER MOVEMENT
+// MOVEMENT
 // ============================================================
 
 const clock =
@@ -934,21 +1041,44 @@ function updatePlayer(
     delta
 ) {
 
+    // --------------------------------
+    // INPUT
+    // --------------------------------
+
     let forward = 0;
     let right = 0;
 
 
-    if (keys["KeyW"])
+    if (
+        keys["KeyW"]
+    ) {
+
         forward += 1;
+    }
 
-    if (keys["KeyS"])
+
+    if (
+        keys["KeyS"]
+    ) {
+
         forward -= 1;
+    }
 
-    if (keys["KeyD"])
+
+    if (
+        keys["KeyD"]
+    ) {
+
         right += 1;
+    }
 
-    if (keys["KeyA"])
+
+    if (
+        keys["KeyA"]
+    ) {
+
         right -= 1;
+    }
 
 
     const moving =
@@ -961,21 +1091,23 @@ function updatePlayer(
             keys["ShiftLeft"] ||
             keys["ShiftRight"]
         ) &&
-        player.stamina > 0 &&
-        moving;
+        moving &&
+        player.stamina > 0;
 
 
-    let speed =
+    const targetSpeed =
         sprinting
             ? player.sprintSpeed
-            : player.moveSpeed;
+            : player.groundSpeed;
 
 
-    // -------------------------
+    // --------------------------------
     // STAMINA
-    // -------------------------
+    // --------------------------------
 
-    if (sprinting) {
+    if (
+        sprinting
+    ) {
 
         player.stamina -=
             35 * delta;
@@ -996,9 +1128,9 @@ function updatePlayer(
         );
 
 
-    // -------------------------
-    // DIRECTION
-    // -------------------------
+    // --------------------------------
+    // CAMERA DIRECTIONS
+    // --------------------------------
 
     const forwardVector =
         new THREE.Vector3();
@@ -1014,13 +1146,25 @@ function updatePlayer(
     forwardVector.normalize();
 
 
+    /*
+        This is the important fix.
+
+        Right is calculated from
+        the camera's forward vector
+        using the correct perpendicular.
+    */
+
     const rightVector =
         new THREE.Vector3(
-            forwardVector.z,
+            -forwardVector.z,
             0,
-            -forwardVector.x
+            forwardVector.x
         );
 
+
+    // --------------------------------
+    // DESIRED MOVEMENT
+    // --------------------------------
 
     const desired =
         new THREE.Vector3();
@@ -1038,6 +1182,8 @@ function updatePlayer(
     );
 
 
+    // Normalize diagonal movement
+
     if (
         desired.lengthSq() > 0
     ) {
@@ -1047,63 +1193,110 @@ function updatePlayer(
     }
 
 
-    // -------------------------
+    // --------------------------------
     // ACCELERATION
-    // -------------------------
+    // --------------------------------
+
+    const groundAcceleration =
+        110;
+
+
+    const airAcceleration =
+        35;
+
 
     const acceleration =
-        95 * delta;
+        player.grounded
+            ? groundAcceleration
+            : airAcceleration;
 
 
-    player.velocity.x =
-        THREE.MathUtils.lerp(
-            player.velocity.x,
-            desired.x * speed,
-            Math.min(
-                1,
-                acceleration
-            )
-        );
+    if (
+        moving
+    ) {
+
+        const targetX =
+            desired.x *
+            targetSpeed;
 
 
-    player.velocity.z =
-        THREE.MathUtils.lerp(
-            player.velocity.z,
-            desired.z * speed,
-            Math.min(
-                1,
-                acceleration
-            )
-        );
+        const targetZ =
+            desired.z *
+            targetSpeed;
 
 
-    // -------------------------
+        player.velocity.x =
+            moveToward(
+                player.velocity.x,
+                targetX,
+                acceleration * delta
+            );
+
+
+        player.velocity.z =
+            moveToward(
+                player.velocity.z,
+                targetZ,
+                acceleration * delta
+            );
+
+    } else {
+
+        // Ground friction
+
+        if (
+            player.grounded
+        ) {
+
+            player.velocity.x =
+                moveToward(
+                    player.velocity.x,
+                    0,
+                    90 * delta
+                );
+
+
+            player.velocity.z =
+                moveToward(
+                    player.velocity.z,
+                    0,
+                    90 * delta
+                );
+        }
+
+    }
+
+
+    // --------------------------------
     // GRAVITY
-    // -------------------------
+    // --------------------------------
 
     player.velocity.y -=
-        28 * delta;
+        30 * delta;
 
 
-    // -------------------------
+    // --------------------------------
     // POSITION
-    // -------------------------
+    // --------------------------------
 
     camera.position.x +=
-        player.velocity.x * delta;
+        player.velocity.x *
+        delta;
 
 
     camera.position.y +=
-        player.velocity.y * delta;
+        player.velocity.y *
+        delta;
 
 
     camera.position.z +=
-        player.velocity.z * delta;
+        player.velocity.z *
+        delta;
 
 
-    // -------------------------
+    // --------------------------------
     // GROUND
-    // -------------------------
+    // --------------------------------
 
     if (
         camera.position.y <=
@@ -1113,16 +1306,23 @@ function updatePlayer(
         camera.position.y =
             player.height;
 
-        player.velocity.y = 0;
+        player.velocity.y =
+            0;
 
-        player.grounded = true;
+        player.grounded =
+            true;
+
+    } else {
+
+        player.grounded =
+            false;
 
     }
 
 
-    // -------------------------
-    // ARENA LIMITS
-    // -------------------------
+    // --------------------------------
+    // BOUNDARIES
+    // --------------------------------
 
     camera.position.x =
         THREE.MathUtils.clamp(
@@ -1140,32 +1340,50 @@ function updatePlayer(
         );
 
 
-    // -------------------------
-    // WEAPON-STYLE CAMERA BOB
-    // -------------------------
+    // --------------------------------
+    // CAMERA BOB
+    // --------------------------------
+
+    const horizontalSpeed =
+        Math.sqrt(
+            player.velocity.x ** 2 +
+            player.velocity.z ** 2
+        );
+
 
     if (
-        moving &&
-        player.grounded
+        player.grounded &&
+        horizontalSpeed > 1
     ) {
 
         player.bobTime +=
             delta *
-            (sprinting ? 15 : 10);
+            (
+                sprinting
+                    ? 17
+                    : 12
+            );
+
+
+        const bobAmount =
+            sprinting
+                ? 0.055
+                : 0.035;
 
 
         camera.position.y =
             player.height +
             Math.sin(
                 player.bobTime
-            ) * 0.035;
+            ) *
+            bobAmount;
 
     }
 
 
-    // -------------------------
-    // HUD
-    // -------------------------
+    // --------------------------------
+    // STAMINA HUD
+    // --------------------------------
 
     document
         .getElementById(
@@ -1173,6 +1391,42 @@ function updatePlayer(
         )
         .style.width =
         player.stamina + "%";
+
+
+    // --------------------------------
+    // SAVE MOVEMENT STATE
+    // --------------------------------
+
+    player.wasMoving =
+        moving;
+}
+
+
+// ============================================================
+// MOVE TOWARD
+// ============================================================
+
+function moveToward(
+    current,
+    target,
+    maxDelta
+) {
+
+    if (
+        Math.abs(
+            target - current
+        ) <= maxDelta
+    ) {
+
+        return target;
+    }
+
+
+    return current +
+        Math.sign(
+            target - current
+        ) *
+        maxDelta;
 }
 
 
@@ -1188,6 +1442,7 @@ document.addEventListener(
             event.button !== 0 ||
             !controls.isLocked
         ) {
+
             return;
         }
 
@@ -1200,11 +1455,11 @@ document.addEventListener(
 
 function shoot() {
 
-    // Small recoil
+    // Recoil
 
     camera.rotation.x +=
         THREE.MathUtils.degToRad(
-            0.7
+            0.65
         );
 
 
@@ -1242,7 +1497,8 @@ function shoot() {
     ) {
 
         createImpact(
-            hits[0].point
+            hits[0].point,
+            direction
         );
 
     }
@@ -1262,7 +1518,7 @@ function createMuzzleFlash() {
     const flash =
         new THREE.PointLight(
             0xffaa44,
-            15,
+            20,
             8
         );
 
@@ -1288,12 +1544,18 @@ function createMuzzleFlash() {
     );
 
 
-    scene.add(flash);
+    scene.add(
+        flash
+    );
 
 
     setTimeout(
         () => {
-            scene.remove(flash);
+
+            scene.remove(
+                flash
+            );
+
         },
         45
     );
@@ -1305,12 +1567,13 @@ function createMuzzleFlash() {
 // ============================================================
 
 function createImpact(
-    position
+    position,
+    direction
 ) {
 
     const geometry =
         new THREE.SphereGeometry(
-            0.08,
+            0.09,
             8,
             8
         );
@@ -1334,12 +1597,18 @@ function createImpact(
     );
 
 
-    scene.add(impact);
+    scene.add(
+        impact
+    );
 
 
     setTimeout(
         () => {
-            scene.remove(impact);
+
+            scene.remove(
+                impact
+            );
+
         },
         120
     );

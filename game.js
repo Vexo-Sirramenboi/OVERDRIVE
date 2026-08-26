@@ -15,20 +15,32 @@ import {
     updateProjectiles
 } from "./enemies.js";
 
+import {
+    initShop,
+    updateShop,
+    checkShopInteraction,
+    interactShop,
+    addBlood,
+    isShopOpen
+} from "./shop.js";
+
 
 /* ============================================================
    SCENE
 ============================================================ */
 
-const scene = new THREE.Scene();
+const scene =
+    new THREE.Scene();
 
 scene.background =
-    new THREE.Color(0x040408);
+    new THREE.Color(
+        0x040408
+    );
 
 scene.fog =
     new THREE.FogExp2(
         0x040408,
-        0.024
+        .024
     );
 
 
@@ -40,7 +52,7 @@ const camera =
     new THREE.PerspectiveCamera(
         90,
         innerWidth / innerHeight,
-        0.05,
+        .05,
         500
     );
 
@@ -57,8 +69,12 @@ camera.position.set(
 
 const renderer =
     new THREE.WebGLRenderer({
+
         antialias: true,
-        powerPreference: "high-performance"
+
+        powerPreference:
+            "high-performance"
+
     });
 
 renderer.setSize(
@@ -67,17 +83,23 @@ renderer.setSize(
 );
 
 renderer.setPixelRatio(
-    Math.min(devicePixelRatio, 2)
+    Math.min(
+        devicePixelRatio,
+        2
+    )
 );
 
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled =
+    true;
 
 renderer.outputColorSpace =
     THREE.SRGBColorSpace;
 
 document
     .getElementById("game")
-    .appendChild(renderer.domElement);
+    .appendChild(
+        renderer.domElement
+    );
 
 
 /* ============================================================
@@ -115,9 +137,12 @@ sun.position.set(
     10
 );
 
-sun.castShadow = true;
+sun.castShadow =
+    true;
 
-scene.add(sun);
+scene.add(
+    sun
+);
 
 
 /* ============================================================
@@ -134,22 +159,30 @@ const floor =
         ),
 
         new THREE.MeshStandardMaterial({
+
             color: 0x101018,
-            roughness: 0.6,
-            metalness: 0.5
+
+            roughness: .6,
+
+            metalness: .5
+
         })
 
     );
 
-floor.position.y = -0.5;
+floor.position.y =
+    -.5;
 
-floor.receiveShadow = true;
+floor.receiveShadow =
+    true;
 
-scene.add(floor);
+scene.add(
+    floor
+);
 
 
 /* ============================================================
-   LEVEL
+   LEVEL BLOCKS
 ============================================================ */
 
 function block(
@@ -171,9 +204,13 @@ function block(
             ),
 
             new THREE.MeshStandardMaterial({
+
                 color: 0x202030,
-                roughness: 0.35,
-                metalness: 0.8
+
+                roughness: .35,
+
+                metalness: .8
+
             })
 
         );
@@ -184,22 +221,90 @@ function block(
         z
     );
 
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow =
+        true;
 
-    scene.add(mesh);
+    mesh.receiveShadow =
+        true;
+
+    scene.add(
+        mesh
+    );
+
 }
 
 
-block(0, 5, -40, 80, 10, 2);
-block(0, 5, 40, 80, 10, 2);
-block(-40, 5, 0, 2, 10, 80);
-block(40, 5, 0, 2, 10, 80);
+block(
+    0,
+    5,
+    -40,
+    80,
+    10,
+    2
+);
 
-block(-13, 3, -10, 8, 6, 8);
-block(13, 3, -14, 8, 6, 8);
-block(-15, 2, 13, 10, 4, 6);
-block(15, 4, 14, 8, 8, 8);
+block(
+    0,
+    5,
+    40,
+    80,
+    10,
+    2
+);
+
+block(
+    -40,
+    5,
+    0,
+    2,
+    10,
+    80
+);
+
+block(
+    40,
+    5,
+    0,
+    2,
+    10,
+    80
+);
+
+block(
+    -13,
+    3,
+    -10,
+    8,
+    6,
+    8
+);
+
+block(
+    13,
+    3,
+    -14,
+    8,
+    6,
+    8
+);
+
+block(
+    -15,
+    2,
+    13,
+    10,
+    4,
+    6
+);
+
+block(
+    15,
+    4,
+    14,
+    8,
+    8,
+    8
+);
 
 
 /* ============================================================
@@ -214,9 +319,111 @@ const grid =
         0x202030
     );
 
-grid.position.y = 0.01;
+grid.position.y =
+    .01;
 
-scene.add(grid);
+scene.add(
+    grid
+);
+
+
+/* ============================================================
+   BROKER PORTAL
+============================================================ */
+
+const brokerPortal =
+    new THREE.Group();
+
+brokerPortal.position.set(
+    0,
+    0,
+    -34
+);
+
+scene.add(
+    brokerPortal
+);
+
+
+const portalFrame =
+    new THREE.Mesh(
+
+        new THREE.TorusGeometry(
+            3,
+            .18,
+            8,
+            32
+        ),
+
+        new THREE.MeshBasicMaterial({
+            color: 0xff174f
+        })
+
+    );
+
+portalFrame.rotation.x =
+    Math.PI / 2;
+
+portalFrame.position.y =
+    3;
+
+brokerPortal.add(
+    portalFrame
+);
+
+
+const portalCore =
+    new THREE.Mesh(
+
+        new THREE.CircleGeometry(
+            2.7,
+            32
+        ),
+
+        new THREE.MeshBasicMaterial({
+
+            color: 0x09000a,
+
+            transparent: true,
+
+            opacity: .8,
+
+            side: THREE.DoubleSide
+
+        })
+
+    );
+
+portalCore.position.set(
+    0,
+    3,
+    0
+);
+
+portalCore.rotation.x =
+    Math.PI / 2;
+
+brokerPortal.add(
+    portalCore
+);
+
+
+const portalLight =
+    new THREE.PointLight(
+        0xff174f,
+        15,
+        12
+    );
+
+portalLight.position.set(
+    0,
+    3,
+    0
+);
+
+brokerPortal.add(
+    portalLight
+);
 
 
 /* ============================================================
@@ -264,7 +471,9 @@ addEventListener(
     "keydown",
     event => {
 
-        keys[event.code] = true;
+        keys[event.code] =
+            true;
+
 
         if (
             event.code === "Space" &&
@@ -276,59 +485,85 @@ addEventListener(
 
             player.grounded =
                 false;
+
         }
+
 
         if (
             event.code === "KeyQ"
         ) {
 
             dash();
+
         }
+
+
+        if (
+            event.code === "KeyE"
+        ) {
+
+            interactShop();
+
+        }
+
 
         if (
             event.code === "Digit1"
         ) {
 
-            equip("revolver");
+            equip(
+                "revolver"
+            );
+
         }
+
 
         if (
             event.code === "Digit2"
         ) {
 
-            equip("shotgun");
+            equip(
+                "shotgun"
+            );
+
         }
+
 
         if (
             event.code === "Digit3"
         ) {
 
-            equip("rocket");
+            equip(
+                "rocket"
+            );
+
         }
+
 
         if (
             event.code === "KeyR"
         ) {
 
             reload();
+
         }
 
     }
 );
 
-
 addEventListener(
     "keyup",
     event => {
 
-        keys[event.code] = false;
+        keys[event.code] =
+            false;
 
     }
 );
 
 
 /* ============================================================
-   WEAPON VIEW
+   3D WEAPON SYSTEM
 ============================================================ */
 
 const weaponView =
@@ -338,24 +573,18 @@ camera.add(
     weaponView
 );
 
-
-/*
-    IMPORTANT:
-
-    Camera looks down -Z.
-
-    Therefore the gun barrel points
-    toward negative Z.
-*/
-
-weaponView.position.set(
-    0.58,
-    -0.48,
-    -0.85
+scene.add(
+    camera
 );
 
+weaponView.position.set(
+    .55,
+    -.45,
+    -1
+);
 
-let currentGun = null;
+let currentGun =
+    null;
 
 let currentWeapon =
     "revolver";
@@ -363,35 +592,45 @@ let currentWeapon =
 let weapon =
     weapons[currentWeapon];
 
-let canFire = true;
+let canFire =
+    true;
 
-let reloading = false;
+let reloading =
+    false;
 
-let gunKick = 0;
+let gunKick =
+    0;
 
-let gunBobTime = 0;
+let gunKickVelocity =
+    0;
+
+let gunBobTime =
+    0;
 
 
 /* ============================================================
-   MATERIALS
+   MATERIAL HELPERS
 ============================================================ */
 
-function metal(color) {
+function metal(
+    color
+) {
 
     return new THREE.MeshStandardMaterial({
 
         color,
 
-        metalness: 0.9,
+        metalness: .9,
 
-        roughness: 0.25
+        roughness: .25
 
     });
 
 }
 
-
-function glow(color) {
+function glow(
+    color
+) {
 
     return new THREE.MeshBasicMaterial({
 
@@ -412,102 +651,66 @@ function createRevolver() {
         new THREE.Group();
 
 
-    /*
-        BODY
-    */
-
     const body =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.65,
-                0.38,
-                0.85
+                .55,
+                .35,
+                .9
             ),
 
-            metal(0x292932)
+            metal(
+                0x292932
+            )
 
         );
 
-    gun.add(body);
+    gun.add(
+        body
+    );
 
-
-    /*
-        BARREL
-
-        Cylinder starts along Y.
-
-        Rotate X 90° so it points along Z.
-    */
 
     const barrel =
         new THREE.Mesh(
 
             new THREE.CylinderGeometry(
-                0.09,
-                0.09,
-                1.35,
-                16
+                .075,
+                .075,
+                1.2,
+                12
             ),
 
-            metal(0x111116)
+            metal(
+                0x111116
+            )
 
         );
 
     barrel.rotation.x =
         Math.PI / 2;
 
-    barrel.position.set(
-        0,
-        0.02,
-        -1.0
+    barrel.position.z =
+        -.85;
+
+    gun.add(
+        barrel
     );
 
-    gun.add(barrel);
-
-
-    /*
-        MUZZLE
-    */
-
-    const muzzle =
-        new THREE.Mesh(
-
-            new THREE.CylinderGeometry(
-                0.12,
-                0.12,
-                0.08,
-                16
-            ),
-
-            metal(0x08080c)
-
-        );
-
-    muzzle.rotation.x =
-        Math.PI / 2;
-
-    muzzle.position.z =
-        -1.68;
-
-    gun.add(muzzle);
-
-
-    /*
-        CYLINDER
-    */
 
     const cylinder =
         new THREE.Mesh(
 
             new THREE.CylinderGeometry(
-                0.28,
-                0.28,
-                0.34,
-                16
+                .25,
+                .25,
+                .32,
+                12
             ),
 
-            metal(0x15151b)
+            metal(
+                0x15151b
+            )
 
         );
 
@@ -515,98 +718,72 @@ function createRevolver() {
         Math.PI / 2;
 
     cylinder.position.z =
-        -0.15;
+        -.15;
 
-    gun.add(cylinder);
+    gun.add(
+        cylinder
+    );
 
-
-    /*
-        ENERGY STRIP
-    */
 
     const energy =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.09,
-                0.09,
-                0.75
+                .08,
+                .08,
+                .75
             ),
 
-            glow(0x00ffff)
+            glow(
+                0x00ffff
+            )
 
         );
 
     energy.position.set(
         0,
-        0.22,
-        -0.25
+        .19,
+        -.15
     );
 
-    gun.add(energy);
+    gun.add(
+        energy
+    );
 
-
-    /*
-        GRIP
-    */
 
     const grip =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.34,
-                0.82,
-                0.34
+                .3,
+                .75,
+                .3
             ),
 
-            metal(0x101016)
+            metal(
+                0x101016
+            )
 
         );
 
     grip.position.set(
         0,
-        -0.5,
-        0.22
+        -.45,
+        .2
     );
 
     grip.rotation.z =
-        THREE.MathUtils.degToRad(-12);
-
-    gun.add(grip);
-
-
-    /*
-        TRIGGER GUARD
-    */
-
-    const trigger =
-        new THREE.Mesh(
-
-            new THREE.TorusGeometry(
-                0.12,
-                0.025,
-                6,
-                16,
-                Math.PI
-            ),
-
-            metal(0x111116)
-
+        THREE.MathUtils.degToRad(
+            -12
         );
 
-    trigger.rotation.x =
-        Math.PI / 2;
-
-    trigger.position.set(
-        0,
-        -0.17,
-        0.15
+    gun.add(
+        grip
     );
-
-    gun.add(trigger);
 
 
     return gun;
+
 }
 
 
@@ -620,29 +797,25 @@ function createShotgun() {
         new THREE.Group();
 
 
-    /*
-        BODY
-    */
-
     const body =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.7,
-                0.48,
-                1.15
+                .65,
+                .45,
+                1.25
             ),
 
-            metal(0x28282f)
+            metal(
+                0x28282f
+            )
 
         );
 
-    gun.add(body);
+    gun.add(
+        body
+    );
 
-
-    /*
-        DOUBLE BARREL
-    */
 
     for (
         let i = 0;
@@ -654,13 +827,15 @@ function createShotgun() {
             new THREE.Mesh(
 
                 new THREE.CylinderGeometry(
-                    0.11,
-                    0.11,
-                    1.8,
-                    16
+                    .095,
+                    .095,
+                    1.7,
+                    12
                 ),
 
-                metal(0x101015)
+                metal(
+                    0x111116
+                )
 
             );
 
@@ -669,131 +844,106 @@ function createShotgun() {
 
         barrel.position.set(
             i === 0
-                ? -0.18
-                : 0.18,
+                ? -.16
+                : .16,
 
-            0.08,
+            .08,
 
             -1.25
         );
 
-        gun.add(barrel);
-
-
-        const muzzle =
-            new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    0.13,
-                    0.13,
-                    0.08,
-                    16
-                ),
-
-                metal(0x08080c)
-
-            );
-
-        muzzle.rotation.x =
-            Math.PI / 2;
-
-        muzzle.position.set(
-            i === 0
-                ? -0.18
-                : 0.18,
-
-            0.08,
-
-            -2.16
+        gun.add(
+            barrel
         );
-
-        gun.add(muzzle);
 
     }
 
-
-    /*
-        PUMP
-    */
 
     const pump =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.75,
-                0.22,
-                0.55
+                .72,
+                .2,
+                .55
             ),
 
-            metal(0x111116)
+            metal(
+                0x111116
+            )
 
         );
 
     pump.position.set(
         0,
-        -0.03,
-        -0.75
+        -.05,
+        -.8
     );
 
-    gun.add(pump);
+    gun.add(
+        pump
+    );
 
-
-    /*
-        GRIP
-    */
 
     const grip =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.38,
-                0.85,
-                0.38
+                .35,
+                .8,
+                .35
             ),
 
-            metal(0x101016)
+            metal(
+                0x101016
+            )
 
         );
 
     grip.position.set(
         0,
-        -0.58,
-        0.3
+        -.55,
+        .3
     );
 
     grip.rotation.z =
-        THREE.MathUtils.degToRad(-10);
+        THREE.MathUtils.degToRad(
+            -10
+        );
 
-    gun.add(grip);
+    gun.add(
+        grip
+    );
 
 
-    /*
-        ENERGY
-    */
-
-    const energy =
+    const glowBar =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.09,
-                0.09,
-                0.7
+                .08,
+                .08,
+                .7
             ),
 
-            glow(0xffaa00)
+            glow(
+                0xffaa00
+            )
 
         );
 
-    energy.position.set(
+    glowBar.position.set(
         0,
-        0.27,
-        -0.3
+        .25,
+        -.35
     );
 
-    gun.add(energy);
+    gun.add(
+        glowBar
+    );
 
 
     return gun;
+
 }
 
 
@@ -807,41 +957,39 @@ function createRocketLauncher() {
         new THREE.Group();
 
 
-    /*
-        BODY
-    */
-
     const body =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.85,
-                0.72,
-                1.35
+                .8,
+                .7,
+                1.5
             ),
 
-            metal(0x25252e)
+            metal(
+                0x25252e
+            )
 
         );
 
-    gun.add(body);
+    gun.add(
+        body
+    );
 
-
-    /*
-        BARREL
-    */
 
     const barrel =
         new THREE.Mesh(
 
             new THREE.CylinderGeometry(
-                0.33,
-                0.29,
-                1.6,
-                20
+                .32,
+                .28,
+                1.5,
+                16
             ),
 
-            metal(0x101015)
+            metal(
+                0x111116
+            )
 
         );
 
@@ -849,26 +997,26 @@ function createRocketLauncher() {
         Math.PI / 2;
 
     barrel.position.z =
-        -1.4;
+        -1.35;
 
-    gun.add(barrel);
+    gun.add(
+        barrel
+    );
 
-
-    /*
-        RED INNER BARREL
-    */
 
     const inner =
         new THREE.Mesh(
 
             new THREE.CylinderGeometry(
-                0.22,
-                0.22,
-                0.08,
-                20
+                .21,
+                .21,
+                .05,
+                16
             ),
 
-            glow(0xff174f)
+            glow(
+                0xff174f
+            )
 
         );
 
@@ -876,72 +1024,77 @@ function createRocketLauncher() {
         Math.PI / 2;
 
     inner.position.z =
-        -2.2;
+        -2.1;
 
-    gun.add(inner);
+    gun.add(
+        inner
+    );
 
-
-    /*
-        GRIP
-    */
 
     const grip =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.42,
-                0.9,
-                0.42
+                .4,
+                .85,
+                .4
             ),
 
-            metal(0x101016)
+            metal(
+                0x101016
+            )
 
         );
 
     grip.position.set(
         0,
-        -0.67,
-        0.28
+        -.65,
+        .3
     );
 
     grip.rotation.z =
-        THREE.MathUtils.degToRad(-8);
+        THREE.MathUtils.degToRad(
+            -8
+        );
 
-    gun.add(grip);
+    gun.add(
+        grip
+    );
 
-
-    /*
-        ENERGY STRIP
-    */
 
     const energy =
         new THREE.Mesh(
 
             new THREE.BoxGeometry(
-                0.1,
-                0.1,
+                .1,
+                .1,
                 1
             ),
 
-            glow(0xff174f)
+            glow(
+                0xff174f
+            )
 
         );
 
-    energy.position.set(
-        0,
-        0.4,
-        -0.25
-    );
+    energy.position.y =
+        .38;
 
-    gun.add(energy);
+    energy.position.z =
+        -.2;
+
+    gun.add(
+        energy
+    );
 
 
     return gun;
+
 }
 
 
 /* ============================================================
-   WEAPON FACTORY
+   CREATE WEAPON
 ============================================================ */
 
 function createWeaponModel(
@@ -972,7 +1125,6 @@ function createWeaponModel(
 
     }
 
-    return createRevolver();
 }
 
 
@@ -980,7 +1132,9 @@ function createWeaponModel(
    EQUIP
 ============================================================ */
 
-function equip(name) {
+function equip(
+    name
+) {
 
     if (
         !weapons[name]
@@ -1009,21 +1163,52 @@ function equip(name) {
         weapons[name];
 
 
+    /*
+        Apply Broker upgrades.
+    */
+
+    const revolverBonus =
+        Number(
+            localStorage.getItem(
+                "revolverDamageBonus"
+            ) || 0
+        );
+
+
+    const shotgunBonus =
+        Number(
+            localStorage.getItem(
+                "shotgunDamageBonus"
+            ) || 0
+        );
+
+
+    if (
+        name === "revolver"
+    ) {
+
+        weapon.damage =
+            weapons[name].damage +
+            revolverBonus;
+
+    }
+
+
+    if (
+        name === "shotgun"
+    ) {
+
+        weapon.damage =
+            weapons[name].damage +
+            shotgunBonus;
+
+    }
+
+
     currentGun =
         createWeaponModel(
             weapon.model
         );
-
-
-    /*
-        Make the weapon clearly visible.
-    */
-
-    currentGun.scale.set(
-        1.15,
-        1.15,
-        1.15
-    );
 
 
     weaponView.add(
@@ -1033,25 +1218,44 @@ function equip(name) {
 
     updateWeaponHUD();
 
+
+    weaponView.position.z =
+        -.65;
+
 }
 
 
 /* ============================================================
-   HUD
+   WEAPON HUD
 ============================================================ */
 
 function updateWeaponHUD() {
 
-    document
-        .getElementById("weaponName")
-        .textContent =
-        weapon.name;
+    const weaponName =
+        document.getElementById(
+            "weaponName"
+        );
+
+    const ammo =
+        document.getElementById(
+            "ammo"
+        );
 
 
-    document
-        .getElementById("ammo")
-        .textContent =
-        `${weapon.ammo} / ${weapon.reserve}`;
+    if (weaponName) {
+
+        weaponName.textContent =
+            weapon.name;
+
+    }
+
+
+    if (ammo) {
+
+        ammo.textContent =
+            `${weapon.ammo} / ${weapon.reserve}`;
+
+    }
 
 }
 
@@ -1064,7 +1268,8 @@ function reload() {
 
     if (
         reloading ||
-        weapon.ammo >= weapon.magazine ||
+        weapon.ammo >=
+        weapon.magazine ||
         weapon.reserve <= 0
     ) {
 
@@ -1073,20 +1278,54 @@ function reload() {
     }
 
 
-    reloading = true;
+    reloading =
+        true;
+
+
+    const name =
+        weapon.name;
+
+
+    const weaponBeforeReload =
+        weapon;
+
+
+    const weaponReloadTime =
+        weapon.reloadTime;
+
+
+    const weaponMagazine =
+        weapon.magazine;
 
 
     document
-        .getElementById("weaponName")
+        .getElementById(
+            "weaponName"
+        )
         .textContent =
-        "RELOADING";
+        "RELOADING...";
 
 
     setTimeout(
         () => {
 
+            if (
+                weapon !==
+                weaponBeforeReload
+            ) {
+
+                reloading =
+                    false;
+
+                updateWeaponHUD();
+
+                return;
+
+            }
+
+
             const needed =
-                weapon.magazine -
+                weaponMagazine -
                 weapon.ammo;
 
 
@@ -1100,7 +1339,6 @@ function reload() {
             weapon.ammo +=
                 amount;
 
-
             weapon.reserve -=
                 amount;
 
@@ -1112,14 +1350,15 @@ function reload() {
             updateWeaponHUD();
 
         },
-        weapon.reloadTime * 1000
+        weaponReloadTime *
+        1000
     );
 
 }
 
 
 /* ============================================================
-   SHOOTING
+   SHOOT
 ============================================================ */
 
 addEventListener(
@@ -1129,7 +1368,8 @@ addEventListener(
         if (
             event.button === 0 &&
             controls.isLocked &&
-            player.alive
+            player.alive &&
+            !isShopOpen()
         ) {
 
             shoot();
@@ -1144,7 +1384,8 @@ function shoot() {
 
     if (
         !canFire ||
-        reloading
+        reloading ||
+        isShopOpen()
     ) {
 
         return;
@@ -1168,26 +1409,31 @@ function shoot() {
     updateWeaponHUD();
 
 
-    canFire = false;
+    canFire =
+        false;
 
 
     setTimeout(
         () => {
 
-            canFire = true;
+            canFire =
+                true;
 
         },
-        weapon.fireRate * 1000
+        weapon.fireRate *
+        1000
     );
 
 
-    /*
-        VISUAL RECOIL ONLY
-    */
-
     gunKick =
-        0.10 +
-        weapon.recoil * 0.06;
+        .08 +
+        weapon.recoil *
+        .045;
+
+
+    gunKickVelocity =
+        weapon.recoil *
+        .12;
 
 
     muzzleFlash();
@@ -1205,7 +1451,7 @@ function shoot() {
 
 
     if (
-        weapon.ammo <= 0
+        weapon.ammo === 0
     ) {
 
         setTimeout(
@@ -1227,7 +1473,6 @@ function fireRay() {
     const direction =
         new THREE.Vector3();
 
-
     camera.getWorldDirection(
         direction
     );
@@ -1236,7 +1481,7 @@ function fireRay() {
     direction.x +=
         (
             Math.random() -
-            0.5
+            .5
         ) *
         weapon.spread;
 
@@ -1244,7 +1489,7 @@ function fireRay() {
     direction.y +=
         (
             Math.random() -
-            0.5
+            .5
         ) *
         weapon.spread;
 
@@ -1252,7 +1497,7 @@ function fireRay() {
     direction.z +=
         (
             Math.random() -
-            0.5
+            .5
         ) *
         weapon.spread;
 
@@ -1312,33 +1557,31 @@ function fireRay() {
 
 
     if (
-        hits.length === 0
+        hits.length > 0
     ) {
 
-        return;
-
-    }
-
-
-    const enemy =
-        hits[0]
-            .object
-            .userData
-            .enemy;
+        const object =
+            hits[0].object;
 
 
-    if (
-        enemy
-    ) {
-
-        damageEnemy(
-            enemy,
-            weapon.damage,
-            hits[0].point
-        );
+        const enemy =
+            object.userData.enemy;
 
 
-        hitmarker();
+        if (
+            enemy
+        ) {
+
+            damageEnemy(
+                enemy,
+                weapon.damage,
+                hits[0].point
+            );
+
+
+            hitmarker();
+
+        }
 
     }
 
@@ -1368,16 +1611,52 @@ function damageEnemy(
         amount;
 
 
-    blood(position);
+    const push =
+        new THREE.Vector3();
+
+
+    push.subVectors(
+        enemy.mesh.position,
+        camera.position
+    );
+
+
+    push.y =
+        0;
+
+
+    if (
+        push.lengthSq() > 0
+    ) {
+
+        push.normalize();
+
+        enemy.mesh.position.addScaledVector(
+            push,
+            weapon.explosive
+                ? 2
+                : .5
+        );
+
+    }
+
+
+    blood(
+        position
+    );
 
 
     if (
         weapon.explosive
     ) {
 
-        explosion(position);
+        explosion(
+            position
+        );
 
-        explosionDamage(position);
+        explosionDamage(
+            position
+        );
 
     }
 
@@ -1386,7 +1665,9 @@ function damageEnemy(
         enemy.health <= 0
     ) {
 
-        kill(enemy);
+        kill(
+            enemy
+        );
 
     }
 
@@ -1426,7 +1707,7 @@ function explosionDamage(
             weapon.explosionRadius
         ) {
 
-            enemy.health -=
+            const damage =
                 100 *
                 (
                     1 -
@@ -1435,11 +1716,17 @@ function explosionDamage(
                 );
 
 
+            enemy.health -=
+                damage;
+
+
             if (
                 enemy.health <= 0
             ) {
 
-                kill(enemy);
+                kill(
+                    enemy
+                );
 
             }
 
@@ -1454,10 +1741,13 @@ function explosionDamage(
    KILLS
 ============================================================ */
 
-let kills = 0;
+let kills =
+    0;
 
 
-function kill(enemy) {
+function kill(
+    enemy
+) {
 
     if (
         !enemy.alive
@@ -1468,15 +1758,35 @@ function kill(enemy) {
     }
 
 
-    enemy.alive = false;
+    enemy.alive =
+        false;
+
 
     kills++;
 
 
-    document
-        .getElementById("kills")
-        .textContent =
-        `KILLS: ${kills}`;
+    /*
+        BLOOD REWARD
+    */
+
+    addBlood(
+        100
+    );
+
+
+    const killHUD =
+        document.getElementById(
+            "kills"
+        );
+
+
+    if (killHUD) {
+
+        killHUD.textContent =
+            "KILLS: " +
+            kills;
+
+    }
 
 
     explosion(
@@ -1506,27 +1816,34 @@ function kill(enemy) {
 
 
 /* ============================================================
-   EXPLOSION EFFECT
+   EXPLOSION
 ============================================================ */
 
 function explosion(
     position
 ) {
 
+    const geometry =
+        new THREE.SphereGeometry(
+            .3,
+            8,
+            8
+        );
+
+
     const material =
         new THREE.MeshBasicMaterial({
+
             color: 0xffaa00,
+
             transparent: true
+
         });
 
 
     const sphere =
         new THREE.Mesh(
-            new THREE.SphereGeometry(
-                0.3,
-                8,
-                8
-            ),
+            geometry,
             material
         );
 
@@ -1536,7 +1853,9 @@ function explosion(
     );
 
 
-    scene.add(sphere);
+    scene.add(
+        sphere
+    );
 
 
     const light =
@@ -1552,7 +1871,9 @@ function explosion(
     );
 
 
-    scene.add(light);
+    scene.add(
+        light
+    );
 
 
     const start =
@@ -1578,7 +1899,8 @@ function explosion(
 
 
         light.intensity =
-            40 * (1 - t);
+            40 *
+            (1 - t);
 
 
         if (
@@ -1611,10 +1933,12 @@ function explosion(
 
 
 /* ============================================================
-   BLOOD
+   BLOOD PARTICLES
 ============================================================ */
 
-function blood(position) {
+function blood(
+    position
+) {
 
     for (
         let i = 0;
@@ -1626,13 +1950,15 @@ function blood(position) {
             new THREE.Mesh(
 
                 new THREE.SphereGeometry(
-                    0.05,
+                    .05,
                     5,
                     5
                 ),
 
                 new THREE.MeshBasicMaterial({
+
                     color: 0xff174f
+
                 })
 
             );
@@ -1653,14 +1979,14 @@ function blood(position) {
 
                 (
                     Math.random() -
-                    0.5
+                    .5
                 ) * 6,
 
                 Math.random() * 5,
 
                 (
                     Math.random() -
-                    0.5
+                    .5
                 ) * 6
 
             );
@@ -1683,13 +2009,13 @@ function blood(position) {
                 velocity
                     .clone()
                     .multiplyScalar(
-                        0.016
+                        .016
                     )
             );
 
 
             velocity.y -=
-                0.3;
+                .3;
 
 
             if (
@@ -1737,7 +2063,7 @@ function muzzleFlash() {
     const light =
         new THREE.PointLight(
             weapon.color,
-            35,
+            30,
             8
         );
 
@@ -1745,7 +2071,7 @@ function muzzleFlash() {
     light.position.set(
         0,
         0,
-        -2
+        -1.8
     );
 
 
@@ -1757,15 +2083,9 @@ function muzzleFlash() {
     setTimeout(
         () => {
 
-            if (
-                currentGun
-            ) {
-
-                currentGun.remove(
-                    light
-                );
-
-            }
+            currentGun?.remove(
+                light
+            );
 
         },
         60
@@ -1786,8 +2106,15 @@ function hitmarker() {
         );
 
 
+    if (!element) {
+
+        return;
+
+    }
+
+
     element.style.transform =
-        "translate(-50%, -50%) scale(1)";
+        "translate(-50%,-50%) scale(1)";
 
 
     element.style.opacity =
@@ -1798,7 +2125,7 @@ function hitmarker() {
         () => {
 
             element.style.transform =
-                "translate(-50%, -50%) scale(0)";
+                "translate(-50%,-50%) scale(0)";
 
 
             element.style.opacity =
@@ -1812,7 +2139,7 @@ function hitmarker() {
 
 
 /* ============================================================
-   WEAPON ANIMATION
+   GUN ANIMATION
 ============================================================ */
 
 function updateGun(
@@ -1828,15 +2155,19 @@ function updateGun(
     }
 
 
-    /*
-        Smooth recoil recovery.
-    */
-
     gunKick =
         THREE.MathUtils.lerp(
             gunKick,
             0,
-            16 * delta
+            14 * delta
+        );
+
+
+    gunKickVelocity =
+        THREE.MathUtils.lerp(
+            gunKickVelocity,
+            0,
+            10 * delta
         );
 
 
@@ -1853,63 +2184,57 @@ function updateGun(
     ) {
 
         gunBobTime +=
-            delta * 11;
+            delta * 10;
+
+    } else {
+
+        gunBobTime =
+            THREE.MathUtils.lerp(
+                gunBobTime,
+                0,
+                5 * delta
+            );
 
     }
 
 
     const bobX =
-        moving
-            ? Math.sin(
-                gunBobTime
-            ) * 0.025
-            : 0;
+        Math.sin(
+            gunBobTime
+        ) * .018;
 
 
     const bobY =
-        moving
-            ? Math.abs(
-                Math.cos(
-                    gunBobTime
-                )
-            ) * 0.02
-            : 0;
+        Math.abs(
+            Math.cos(
+                gunBobTime
+            )
+        ) * .018;
 
-
-    /*
-        Weapon position.
-
-        Recoil pushes it toward camera
-        by increasing Z.
-    */
 
     weaponView.position.x =
-        0.58 +
+        .55 +
         bobX;
 
 
     weaponView.position.y =
-        -0.48 +
+        -.45 +
         bobY;
 
 
     weaponView.position.z =
-        -0.85 +
+        -.9 +
         gunKick;
 
 
-    /*
-        Weapon itself tilts.
-
-        Camera DOES NOT tilt.
-    */
-
     weaponView.rotation.x =
-        gunKick * 1.8;
+        gunKick *
+        1.8;
 
 
     weaponView.rotation.z =
-        bobX * 1.5;
+        bobX *
+        1.5;
 
 }
 
@@ -1922,7 +2247,8 @@ function dash() {
 
     if (
         !controls.isLocked ||
-        !player.canDash
+        !player.canDash ||
+        isShopOpen()
     ) {
 
         return;
@@ -1939,7 +2265,8 @@ function dash() {
     );
 
 
-    direction.y = 0;
+    direction.y =
+        0;
 
 
     if (
@@ -1957,23 +2284,33 @@ function dash() {
     );
 
 
-    player.canDash = false;
+    player.canDash =
+        false;
+
+
+    const dashCooldown =
+        Number(
+            localStorage.getItem(
+                "dashCooldown"
+            ) || 600
+        );
 
 
     setTimeout(
         () => {
 
-            player.canDash = true;
+            player.canDash =
+                true;
 
         },
-        600
+        dashCooldown
     );
 
 }
 
 
 /* ============================================================
-   MOVEMENT
+   PLAYER MOVEMENT
 ============================================================ */
 
 function moveToward(
@@ -2006,9 +2343,12 @@ function updatePlayer(
     delta
 ) {
 
-    let forward = 0;
+    let forward =
+        0;
 
-    let right = 0;
+
+    let right =
+        0;
 
 
     if (
@@ -2041,6 +2381,15 @@ function updatePlayer(
         keys["ShiftRight"];
 
 
+    const maxStamina =
+        100 +
+        Number(
+            localStorage.getItem(
+                "maxStaminaBonus"
+            ) || 0
+        );
+
+
     const speed =
         sprint &&
         player.stamina > 0
@@ -2069,7 +2418,7 @@ function updatePlayer(
         THREE.MathUtils.clamp(
             player.stamina,
             0,
-            100
+            maxStamina
         );
 
 
@@ -2082,7 +2431,8 @@ function updatePlayer(
     );
 
 
-    forwardVector.y = 0;
+    forwardVector.y =
+        0;
 
 
     if (
@@ -2193,8 +2543,10 @@ function updatePlayer(
         camera.position.y =
             player.height;
 
+
         player.velocity.y =
             0;
+
 
         player.grounded =
             true;
@@ -2223,18 +2575,72 @@ function updatePlayer(
         );
 
 
-    document
-        .getElementById(
+    const staminaBar =
+        document.getElementById(
             "staminaBar"
-        )
-        .style.width =
-        `${player.stamina}%`;
+        );
+
+
+    if (staminaBar) {
+
+        staminaBar.style.width =
+            (
+                player.stamina /
+                maxStamina *
+                100
+            ) + "%";
+
+    }
 
 }
 
 
 /* ============================================================
-   ENEMY SPAWNING
+   BROKER PORTAL TELEPORT
+============================================================ */
+
+function checkBrokerPortal() {
+
+    if (
+        !controls.isLocked ||
+        isShopOpen()
+    ) {
+
+        return;
+
+    }
+
+
+    const distance =
+        camera.position.distanceTo(
+            brokerPortal.position
+        );
+
+
+    if (
+        distance < 4
+    ) {
+
+        camera.position.set(
+            0,
+            player.height,
+            -62
+        );
+
+
+        player.velocity.set(
+            0,
+            0,
+            0
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SPAWN
 ============================================================ */
 
 function spawnEnemy() {
@@ -2331,14 +2737,20 @@ function damagePlayer(
         );
 
 
-    document
-        .getElementById(
+    const health =
+        document.getElementById(
             "health"
-        )
-        .textContent =
-        Math.ceil(
-            player.health
         );
+
+
+    if (health) {
+
+        health.textContent =
+            Math.ceil(
+                player.health
+            );
+
+    }
 
 
     const flash =
@@ -2347,35 +2759,48 @@ function damagePlayer(
         );
 
 
-    flash.style.background =
-        "rgba(255,0,0,.3)";
+    if (flash) {
+
+        flash.style.background =
+            "rgba(255,0,0,.3)";
 
 
-    setTimeout(
-        () => {
+        setTimeout(
+            () => {
 
-            flash.style.background =
-                "rgba(255,0,0,0)";
+                flash.style.background =
+                    "rgba(255,0,0,0)";
 
-        },
-        100
-    );
+            },
+            100
+        );
+
+    }
 
 
     if (
         player.health <= 0
     ) {
 
-        player.alive = false;
+        player.alive =
+            false;
+
 
         controls.unlock();
 
-        document
-            .getElementById(
+
+        const deathScreen =
+            document.getElementById(
                 "deathScreen"
-            )
-            .style.display =
-            "flex";
+            );
+
+
+        if (deathScreen) {
+
+            deathScreen.style.display =
+                "flex";
+
+        }
 
     }
 
@@ -2402,39 +2827,60 @@ const deathScreen =
     );
 
 
-startScreen.onclick =
-    () => {
+if (startScreen) {
 
-        controls.lock();
+    startScreen.onclick =
+        () => {
 
-    };
+            controls.lock();
 
+        };
 
-pauseScreen.onclick =
-    () => {
-
-        controls.lock();
-
-    };
+}
 
 
-deathScreen.onclick =
-    () => {
+if (pauseScreen) {
 
-        location.reload();
+    pauseScreen.onclick =
+        () => {
 
-    };
+            controls.lock();
+
+        };
+
+}
+
+
+if (deathScreen) {
+
+    deathScreen.onclick =
+        () => {
+
+            location.reload();
+
+        };
+
+}
 
 
 controls.addEventListener(
     "lock",
     () => {
 
-        startScreen.style.display =
-            "none";
+        if (startScreen) {
 
-        pauseScreen.style.display =
-            "none";
+            startScreen.style.display =
+                "none";
+
+        }
+
+
+        if (pauseScreen) {
+
+            pauseScreen.style.display =
+                "none";
+
+        }
 
     }
 );
@@ -2445,11 +2891,16 @@ controls.addEventListener(
     () => {
 
         if (
-            player.alive
+            player.alive &&
+            !isShopOpen()
         ) {
 
-            pauseScreen.style.display =
-                "flex";
+            if (pauseScreen) {
+
+                pauseScreen.style.display =
+                    "flex";
+
+            }
 
         }
 
@@ -2483,11 +2934,17 @@ addEventListener(
 
 
 /* ============================================================
-   START WEAPON
+   INITIALIZE
 ============================================================ */
 
 equip(
     "revolver"
+);
+
+
+initShop(
+    scene,
+    camera
 );
 
 
@@ -2509,18 +2966,25 @@ function animate() {
     const delta =
         Math.min(
             clock.getDelta(),
-            0.05
+            .05
         );
 
 
     if (
         controls.isLocked &&
-        player.alive
+        player.alive &&
+        !isShopOpen()
     ) {
 
-        updatePlayer(delta);
+        updatePlayer(
+            delta
+        );
 
-        updateGun(delta);
+
+        updateGun(
+            delta
+        );
+
 
         updateEnemies(
             delta,
@@ -2528,6 +2992,7 @@ function animate() {
             scene,
             damagePlayer
         );
+
 
         updateProjectiles(
             delta,
@@ -2538,9 +3003,52 @@ function animate() {
 
     } else {
 
-        updateGun(delta);
+        updateGun(
+            delta
+        );
 
     }
+
+
+    /*
+        Broker systems
+    */
+
+    updateShop(
+        delta
+    );
+
+
+    checkBrokerPortal();
+
+
+    checkShopInteraction();
+
+
+    /*
+        Animate portal
+    */
+
+    const time =
+        performance.now() *
+        .001;
+
+
+    portalFrame.rotation.z =
+        time;
+
+
+    portalFrame.scale.setScalar(
+        1 +
+        Math.sin(time * 3) *
+        .08
+    );
+
+
+    portalLight.intensity =
+        12 +
+        Math.sin(time * 5) *
+        4;
 
 
     renderer.render(

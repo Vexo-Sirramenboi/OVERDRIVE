@@ -1,23 +1,32 @@
 import * as THREE from "three";
 
+
 /* ============================================================
-   THE BROKER SHOP
+   THE BROKER
 ============================================================ */
 
-let scene;
-let camera;
+let scene = null;
+let camera = null;
 
 let brokerRoom = null;
 let broker = null;
+
 let shopOpen = false;
 
-let blood = Number(
-    localStorage.getItem("blood") || 0
-);
+let blood =
+    Number(
+        localStorage.getItem(
+            "blood"
+        ) || 0
+    );
 
-const purchases = JSON.parse(
-    localStorage.getItem("brokerPurchases") || "{}"
-);
+
+let purchases =
+    JSON.parse(
+        localStorage.getItem(
+            "brokerPurchases"
+        ) || "{}"
+    );
 
 
 /* ============================================================
@@ -29,11 +38,17 @@ export function initShop(
     gameCamera
 ) {
 
-    scene = gameScene;
-    camera = gameCamera;
+    scene =
+        gameScene;
+
+    camera =
+        gameCamera;
+
 
     createBrokerRoom();
+
     createBroker();
+
     createShopUI();
 
     updateBloodHUD();
@@ -45,14 +60,24 @@ export function initShop(
    BLOOD
 ============================================================ */
 
-export function addBlood(amount) {
+export function addBlood(
+    amount
+) {
 
-    blood += Math.max(0, Math.floor(amount));
+    blood +=
+        Math.max(
+            0,
+            Math.floor(
+                amount
+            )
+        );
+
 
     localStorage.setItem(
         "blood",
         blood
     );
+
 
     updateBloodHUD();
 
@@ -75,21 +100,18 @@ function createBrokerRoom() {
     brokerRoom =
         new THREE.Group();
 
-    brokerRoom.visible = true;
 
     /*
-        The shop is placed far away from
-        the main arena.
+        The room exists beyond the
+        normal arena.
     */
 
-    const roomX = 0;
-    const roomZ = -70;
-
     brokerRoom.position.set(
-        roomX,
         0,
-        roomZ
+        0,
+        -70
     );
+
 
     scene.add(
         brokerRoom
@@ -120,7 +142,7 @@ function createBrokerRoom() {
         });
 
 
-    // Floor
+    /* FLOOR */
 
     const floor =
         new THREE.Mesh(
@@ -149,7 +171,7 @@ function createBrokerRoom() {
     );
 
 
-    // Back wall
+    /* BACK WALL */
 
     const back =
         new THREE.Mesh(
@@ -177,7 +199,7 @@ function createBrokerRoom() {
     );
 
 
-    // Side walls
+    /* LEFT WALL */
 
     const left =
         new THREE.Mesh(
@@ -205,6 +227,8 @@ function createBrokerRoom() {
     );
 
 
+    /* RIGHT WALL */
+
     const right =
         left.clone();
 
@@ -218,7 +242,7 @@ function createBrokerRoom() {
     );
 
 
-    // Ceiling
+    /* CEILING */
 
     const ceiling =
         new THREE.Mesh(
@@ -243,7 +267,7 @@ function createBrokerRoom() {
     );
 
 
-    // Red lights
+    /* RED LIGHTS */
 
     for (
         let i = -1;
@@ -273,7 +297,7 @@ function createBrokerRoom() {
     }
 
 
-    // Strange cyan light behind Broker
+    /* CYAN BACKLIGHT */
 
     const cyanLight =
         new THREE.PointLight(
@@ -331,6 +355,8 @@ function createBroker() {
         });
 
 
+    /* BODY */
+
     const body =
         new THREE.Mesh(
 
@@ -359,6 +385,8 @@ function createBroker() {
     );
 
 
+    /* HEAD */
+
     const head =
         new THREE.Mesh(
 
@@ -382,14 +410,13 @@ function createBroker() {
     );
 
 
-    /*
-        The Broker has no visible mouth.
-        Only two glowing eyes.
-    */
+    /* EYES */
 
     const eyeMaterial =
         new THREE.MeshBasicMaterial({
+
             color: 0xff174f
+
         });
 
 
@@ -425,7 +452,7 @@ function createBroker() {
     }
 
 
-    // Counter
+    /* COUNTER */
 
     const counter =
         new THREE.Mesh(
@@ -461,7 +488,7 @@ function createBroker() {
     );
 
 
-    // Floating symbol
+    /* FLOATING SYMBOL */
 
     const symbol =
         new THREE.Mesh(
@@ -474,7 +501,9 @@ function createBroker() {
             ),
 
             new THREE.MeshBasicMaterial({
+
                 color: 0xff003c
+
             })
 
         );
@@ -499,14 +528,16 @@ function createBroker() {
 
 
 /* ============================================================
-   BROKER ANIMATION
+   ANIMATION
 ============================================================ */
 
 export function updateShop(
     delta
 ) {
 
-    if (!broker) {
+    if (
+        !broker
+    ) {
 
         return;
 
@@ -519,7 +550,9 @@ export function updateShop(
 
 
     broker.position.y =
-        Math.sin(time * 1.5) *
+        Math.sin(
+            time * 1.5
+        ) *
         .04;
 
 
@@ -528,7 +561,55 @@ export function updateShop(
     ) {
 
         broker.userData.symbol.rotation.z +=
-            delta * .8;
+            delta *
+            .8;
+
+    }
+
+
+    /*
+        Make the Broker look toward
+        the player when nearby.
+    */
+
+    if (
+        camera
+    ) {
+
+        const target =
+            new THREE.Vector3();
+
+        camera.getWorldPosition(
+            target
+        );
+
+
+        const brokerWorld =
+            new THREE.Vector3();
+
+        broker.getWorldPosition(
+            brokerWorld
+        );
+
+
+        const distance =
+            target.distanceTo(
+                brokerWorld
+            );
+
+
+        if (
+            distance < 15
+        ) {
+
+            broker.lookAt(
+                target.x,
+                broker.position.y +
+                4,
+                target.z
+            );
+
+        }
 
     }
 
@@ -541,7 +622,10 @@ export function updateShop(
 
 export function checkShopInteraction() {
 
-    if (!camera) {
+    if (
+        !camera ||
+        !broker
+    ) {
 
         return;
 
@@ -586,6 +670,7 @@ function showInteraction() {
             "shopPrompt"
         );
 
+
     if (!prompt) {
 
         return;
@@ -606,6 +691,7 @@ function hideInteraction() {
             "shopPrompt"
         );
 
+
     if (!prompt) {
 
         return;
@@ -620,14 +706,26 @@ function hideInteraction() {
 
 
 /* ============================================================
-   OPEN / CLOSE
+   OPEN SHOP
 ============================================================ */
 
 export function interactShop() {
 
-    if (shopOpen) {
+    if (
+        shopOpen
+    ) {
 
         closeShop();
+
+        return;
+
+    }
+
+
+    if (
+        !broker ||
+        !camera
+    ) {
 
         return;
 
@@ -643,10 +741,14 @@ export function interactShop() {
     );
 
 
-    if (
+    const distance =
         camera.position.distanceTo(
             brokerPosition
-        ) > 8
+        );
+
+
+    if (
+        distance > 8
     ) {
 
         return;
@@ -682,6 +784,8 @@ function openShop() {
         "flex";
 
 
+    hideInteraction();
+
     updateShopUI();
 
 }
@@ -710,14 +814,12 @@ function closeShop() {
 
 
 /* ============================================================
-   SHOP UI
+   UI
 ============================================================ */
 
 function createShopUI() {
 
-    /*
-        Interaction prompt
-    */
+    /* INTERACTION PROMPT */
 
     const prompt =
         document.createElement(
@@ -748,6 +850,7 @@ function createShopUI() {
         border:1px solid #ff174f;
         display:none;
         z-index:100;
+        pointer-events:none;
 
     `;
 
@@ -757,9 +860,7 @@ function createShopUI() {
     );
 
 
-    /*
-        Shop menu
-    */
+    /* SHOP MENU */
 
     const menu =
         document.createElement(
@@ -778,7 +879,7 @@ function createShopUI() {
         display:none;
         align-items:center;
         justify-content:center;
-        background:rgba(0,0,0,.82);
+        background:rgba(0,0,0,.86);
         z-index:200;
         font-family:monospace;
         color:white;
@@ -788,7 +889,7 @@ function createShopUI() {
 
     menu.innerHTML = `
 
-        <div id="shopPanel"
+        <div
 
             style="
                 width:min(850px,90vw);
@@ -797,7 +898,8 @@ function createShopUI() {
                 background:#08080d;
                 border:2px solid #ff174f;
                 box-shadow:
-                    0 0 40px rgba(255,0,60,.25);
+                    0 0 40px
+                    rgba(255,0,60,.25);
                 padding:30px;
             "
 
@@ -832,7 +934,10 @@ function createShopUI() {
                     color:#ff174f;
                     font-size:22px;
                 ">
-                    🩸 <span id="shopBlood">0</span>
+                    BLOOD:
+                    <span id="shopBlood">
+                        0
+                    </span>
                 </div>
 
             </div>
@@ -855,7 +960,8 @@ function createShopUI() {
             <div id="shopItems"></div>
 
 
-            <button id="closeShop"
+            <button
+                id="closeShop"
 
                 style="
                     width:100%;
@@ -891,9 +997,7 @@ function createShopUI() {
         closeShop;
 
 
-    /*
-        Blood HUD
-    */
+    /* BLOOD HUD */
 
     const bloodHUD =
         document.createElement(
@@ -906,7 +1010,12 @@ function createShopUI() {
 
 
     bloodHUD.innerHTML =
-        `🩸 BLOOD: <span id="bloodAmount">${blood}</span>`;
+        `
+        BLOOD:
+        <span id="bloodAmount">
+            ${blood}
+        </span>
+        `;
 
 
     bloodHUD.style.cssText = `
@@ -919,7 +1028,8 @@ function createShopUI() {
         font-weight:bold;
         font-size:16px;
         z-index:20;
-        text-shadow:0 0 8px #ff174f;
+        text-shadow:
+            0 0 8px #ff174f;
 
     `;
 
@@ -932,64 +1042,111 @@ function createShopUI() {
 
 
 /* ============================================================
-   SHOP ITEMS
+   ITEMS
 ============================================================ */
 
 const items = [
 
     {
-        id: "revolverDamage",
-        name: "DEAD EYE",
+        id:
+            "revolverDamage",
+
+        name:
+            "DEAD EYE",
+
         description:
             "Increase revolver damage.",
-        price: 500
+
+        price:
+            500
+
     },
 
+
     {
-        id: "shotgunDamage",
-        name: "HEAVIER SHELLS",
+        id:
+            "shotgunDamage",
+
+        name:
+            "HEAVIER SHELLS",
+
         description:
             "Increase shotgun damage.",
-        price: 750
+
+        price:
+            750
+
     },
 
+
     {
-        id: "dash",
-        name: "OVERCLOCKED NERVES",
+        id:
+            "dash",
+
+        name:
+            "OVERCLOCKED NERVES",
+
         description:
-            "Dash cooldown becomes shorter.",
-        price: 1000
+            "Reduce dash cooldown.",
+
+        price:
+            1000
+
     },
 
+
     {
-        id: "health",
-        name: "SECOND HEART",
+        id:
+            "health",
+
+        name:
+            "SECOND HEART",
+
         description:
-            "Increase maximum health by 25.",
-        price: 1200
+            "Increase maximum health.",
+
+        price:
+            1200
+
     },
 
+
     {
-        id: "stamina",
-        name: "ADRENAL SYSTEM",
+        id:
+            "stamina",
+
+        name:
+            "ADRENAL SYSTEM",
+
         description:
             "Increase maximum stamina.",
-        price: 900
+
+        price:
+            900
+
     },
 
+
     {
-        id: "unknown",
-        name: "UNKNOWN",
+        id:
+            "unknown",
+
+        name:
+            "UNKNOWN",
+
         description:
             "The Broker refuses to explain this.",
-        price: 5000
+
+        price:
+            5000
+
     }
 
 ];
 
 
 /* ============================================================
-   DRAW ITEMS
+   SHOP UI
 ============================================================ */
 
 function updateShopUI() {
@@ -1009,15 +1166,23 @@ function updateShopUI() {
         );
 
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return;
 
     }
 
 
-    dialogue.textContent =
-        getBrokerDialogue();
+    if (
+        dialogue
+    ) {
+
+        dialogue.textContent =
+            getBrokerDialogue();
+
+    }
 
 
     container.innerHTML =
@@ -1029,7 +1194,9 @@ function updateShopUI() {
     ) {
 
         const purchased =
-            purchases[item.id];
+            purchases[
+                item.id
+            ];
 
 
         const button =
@@ -1082,9 +1249,12 @@ function updateShopUI() {
                 </span>
 
                 <span>
-                    ${purchased
+                    ${
+                        purchased
                         ? "PURCHASED"
-                        : "🩸 " + item.price}
+                        : "BLOOD " +
+                          item.price
+                    }
                 </span>
 
             </div>
@@ -1099,7 +1269,9 @@ function updateShopUI() {
         `;
 
 
-        if (!purchased) {
+        if (
+            !purchased
+        ) {
 
             button.onclick =
                 () => {
@@ -1131,7 +1303,9 @@ function buyItem(
 ) {
 
     if (
-        purchases[item.id]
+        purchases[
+            item.id
+        ]
     ) {
 
         return;
@@ -1140,7 +1314,8 @@ function buyItem(
 
 
     if (
-        blood < item.price
+        blood <
+        item.price
     ) {
 
         setDialogue(
@@ -1156,7 +1331,9 @@ function buyItem(
         item.price;
 
 
-    purchases[item.id] =
+    purchases[
+        item.id
+    ] =
         true;
 
 
@@ -1192,20 +1369,16 @@ function buyItem(
 
 
 /* ============================================================
-   UPGRADES
+   APPLY UPGRADES
 ============================================================ */
 
 function applyUpgrade(
     id
 ) {
 
-    /*
-        These values are read by game.js
-        through localStorage.
-    */
-
     if (
-        id === "revolverDamage"
+        id ===
+        "revolverDamage"
     ) {
 
         localStorage.setItem(
@@ -1217,7 +1390,8 @@ function applyUpgrade(
 
 
     if (
-        id === "shotgunDamage"
+        id ===
+        "shotgunDamage"
     ) {
 
         localStorage.setItem(
@@ -1229,7 +1403,8 @@ function applyUpgrade(
 
 
     if (
-        id === "dash"
+        id ===
+        "dash"
     ) {
 
         localStorage.setItem(
@@ -1241,7 +1416,8 @@ function applyUpgrade(
 
 
     if (
-        id === "health"
+        id ===
+        "health"
     ) {
 
         localStorage.setItem(
@@ -1253,12 +1429,26 @@ function applyUpgrade(
 
 
     if (
-        id === "stamina"
+        id ===
+        "stamina"
     ) {
 
         localStorage.setItem(
             "maxStaminaBonus",
             "50"
+        );
+
+    }
+
+
+    if (
+        id ===
+        "unknown"
+    ) {
+
+        localStorage.setItem(
+            "unknownPurchased",
+            "true"
         );
 
     }
@@ -1278,9 +1468,13 @@ function getBrokerDialogue() {
         ).length;
 
 
-    if (count === 0) {
+    if (
+        count === 0
+    ) {
 
-        return "You have blood on you. Good.";
+        return (
+            "You have blood on you. Good."
+        );
 
     }
 
@@ -1289,19 +1483,30 @@ function getBrokerDialogue() {
         purchases.unknown
     ) {
 
-        return "You bought the thing you were not supposed to buy.";
+        return (
+            "You bought the thing " +
+            "you were not supposed to buy."
+        );
 
     }
 
 
-    if (count >= 4) {
+    if (
+        count >= 4
+    ) {
 
-        return "You are spending blood very quickly.";
+        return (
+            "You are spending blood " +
+            "very quickly."
+        );
 
     }
 
 
-    return "Choose carefully. Everything has a price.";
+    return (
+        "Choose carefully. " +
+        "Everything has a price."
+    );
 
 }
 
@@ -1311,15 +1516,21 @@ function getPurchaseDialogue(
 ) {
 
     if (
-        item.id === "unknown"
+        item.id ===
+        "unknown"
     ) {
 
-        return "The Broker stares at you. Something behind its eyes moves.";
+        return (
+            "The Broker stares at you. " +
+            "Something behind its eyes moves."
+        );
 
     }
 
 
-    return "A wise investment. Probably.";
+    return (
+        "A wise investment. Probably."
+    );
 
 }
 
@@ -1334,7 +1545,9 @@ function setDialogue(
         );
 
 
-    if (dialogue) {
+    if (
+        dialogue
+    ) {
 
         dialogue.textContent =
             text;
@@ -1362,7 +1575,9 @@ function updateBloodHUD() {
         );
 
 
-    if (amount) {
+    if (
+        amount
+    ) {
 
         amount.textContent =
             blood;
@@ -1370,7 +1585,9 @@ function updateBloodHUD() {
     }
 
 
-    if (shopAmount) {
+    if (
+        shopAmount
+    ) {
 
         shopAmount.textContent =
             blood;
@@ -1381,7 +1598,7 @@ function updateBloodHUD() {
 
 
 /* ============================================================
-   SHOP STATE
+   STATE
 ============================================================ */
 
 export function isShopOpen() {

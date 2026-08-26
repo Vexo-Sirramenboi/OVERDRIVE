@@ -6,9 +6,9 @@ export const enemies = [];
 export const projectiles = [];
 
 
-// ========================================
-// CREATE ENEMY
-// ========================================
+/* =====================================
+   CREATE ENEMY
+===================================== */
 
 export function createEnemy(
     scene,
@@ -18,8 +18,6 @@ export function createEnemy(
     const group =
         new THREE.Group();
 
-
-    // BODY
 
     const body =
         new THREE.Mesh(
@@ -49,13 +47,8 @@ export function createEnemy(
     body.castShadow =
         true;
 
+    group.add(body);
 
-    group.add(
-        body
-    );
-
-
-    // HEAD
 
     const head =
         new THREE.Mesh(
@@ -80,13 +73,8 @@ export function createEnemy(
     head.position.y =
         2.75;
 
+    group.add(head);
 
-    group.add(
-        head
-    );
-
-
-    // EYE
 
     const eye =
         new THREE.Mesh(
@@ -112,13 +100,8 @@ export function createEnemy(
         -.46
     );
 
+    group.add(eye);
 
-    group.add(
-        eye
-    );
-
-
-    // LIGHT
 
     const light =
         new THREE.PointLight(
@@ -131,20 +114,14 @@ export function createEnemy(
     light.position.y =
         2.5;
 
-
-    group.add(
-        light
-    );
+    group.add(light);
 
 
     group.position.copy(
         position
     );
 
-
-    scene.add(
-        group
-    );
+    scene.add(group);
 
 
     const enemy = {
@@ -182,18 +159,15 @@ export function createEnemy(
     );
 
 
-    enemies.push(
-        enemy
-    );
-
+    enemies.push(enemy);
 
     return enemy;
 }
 
 
-// ========================================
-// UPDATE ENEMIES
-// ========================================
+/* =====================================
+   UPDATE ENEMIES
+===================================== */
 
 export function updateEnemies(
     delta,
@@ -209,7 +183,6 @@ export function updateEnemies(
         if (
             !enemy.alive
         ) {
-
             continue;
         }
 
@@ -234,23 +207,18 @@ export function updateEnemies(
         direction.normalize();
 
 
-        // CHASE
-
         if (
             distance > 5
         ) {
 
             enemy.mesh.position.add(
                 direction.multiplyScalar(
-                    enemy.speed *
-                    delta
+                    enemy.speed * delta
                 )
             );
 
         }
 
-
-        // FACE PLAYER
 
         enemy.mesh.lookAt(
             camera.position.x,
@@ -258,8 +226,6 @@ export function updateEnemies(
             camera.position.z
         );
 
-
-        // SHOOT
 
         enemy.shootTimer -=
             delta;
@@ -274,7 +240,6 @@ export function updateEnemies(
                 1.2 +
                 Math.random() * 1.5;
 
-
             enemyShoot(
                 enemy,
                 camera,
@@ -283,8 +248,6 @@ export function updateEnemies(
 
         }
 
-
-        // MELEE
 
         if (
             distance < 2.2
@@ -297,12 +260,13 @@ export function updateEnemies(
         }
 
     }
+
 }
 
 
-// ========================================
-// ENEMY SHOOT
-// ========================================
+/* =====================================
+   ENEMY PROJECTILE
+===================================== */
 
 function enemyShoot(
     enemy,
@@ -371,9 +335,9 @@ function enemyShoot(
 }
 
 
-// ========================================
-// UPDATE PROJECTILES
-// ========================================
+/* =====================================
+   UPDATE PROJECTILES
+===================================== */
 
 export function updateProjectiles(
     delta,
@@ -415,9 +379,7 @@ export function updateProjectiles(
                 ) < .8
         ) {
 
-            damagePlayer(
-                15
-            );
+            damagePlayer(15);
 
 
             scene.remove(
@@ -429,7 +391,6 @@ export function updateProjectiles(
                 i,
                 1
             );
-
 
             continue;
         }

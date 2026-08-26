@@ -20,9 +20,11 @@ export const weapons = {
 
         reloadTime: 1.2,
 
-        recoil: 1.2,
+        recoil: 1,
 
-        color: 0x00ffff
+        color: 0x00ffff,
+
+        model: "revolver"
 
     },
 
@@ -47,9 +49,11 @@ export const weapons = {
 
         reloadTime: 1.5,
 
-        recoil: 4,
+        recoil: 2,
 
-        color: 0xffaa00
+        color: 0xffaa00,
+
+        model: "shotgun"
 
     },
 
@@ -64,7 +68,7 @@ export const weapons = {
 
         spread: 0,
 
-        fireRate: 1.0,
+        fireRate: 1,
 
         magazine: 4,
 
@@ -74,13 +78,15 @@ export const weapons = {
 
         reloadTime: 1.8,
 
-        recoil: 3,
+        recoil: 2.5,
 
         color: 0xff174f,
 
         explosive: true,
 
-        explosionRadius: 5
+        explosionRadius: 5,
+
+        model: "rocket"
 
     }
 

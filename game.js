@@ -496,9 +496,10 @@ weaponView.position.set(
 
 weaponView.rotation.set(
     0,
-    Math.PI,
+    0,
     0
 );
+
 
 
 let currentGun =

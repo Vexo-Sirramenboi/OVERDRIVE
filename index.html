@@ -23,119 +23,73 @@
 
 <body>
 
-    <div id="game"></div>
+<div id="game"></div>
 
-    <div id="crosshair"></div>
+<div id="crosshair"></div>
+<div id="hitmarker"></div>
+<div id="damageFlash"></div>
+<div id="vignette"></div>
 
-    <div id="hitmarker"></div>
+<div id="hud">
 
-    <div id="damageFlash"></div>
+    <div id="health">100</div>
+    <div id="healthLabel">INTEGRITY</div>
 
-    <div id="vignette"></div>
-
-
-    <!-- HUD -->
-
-    <div id="hud">
-
-        <div id="health">
-            100
-        </div>
-
-        <div id="healthLabel">
-            INTEGRITY
-        </div>
-
-        <div id="staminaContainer">
-            <div id="staminaBar"></div>
-        </div>
-
-        <div id="ammo">
-            12 / 60
-        </div>
-
-        <div id="weaponName">
-            REVOLVER
-        </div>
-
-        <div id="kills">
-            KILLS: 0
-        </div>
-
+    <div id="staminaContainer">
+        <div id="staminaBar"></div>
     </div>
 
+    <div id="ammo">12 / 60</div>
 
-    <!-- WEAPON -->
-
-    <div id="weapon">
-
-        <div class="gunBody"></div>
-
-        <div class="gunBarrel"></div>
-
-        <div class="gunBarrel2"></div>
-
-        <div class="gunGlow"></div>
-
-        <div class="gunGrip"></div>
-
+    <div id="weaponName">
+        REVOLVER
     </div>
 
-
-    <!-- START -->
-
-    <div id="startScreen">
-
-        <h1>
-            OVERDRIVE
-        </h1>
-
-        <div class="subtitle">
-            COMBAT SYSTEM ONLINE
-        </div>
-
-        <div class="clickText">
-            CLICK TO ENTER
-        </div>
-
-        <div class="controlsText">
-            WASD · MOUSE · SPACE · SHIFT · Q · 1 2 3
-        </div>
-
+    <div id="kills">
+        KILLS: 0
     </div>
 
+</div>
 
-    <!-- PAUSE -->
 
-    <div id="pauseScreen">
+<div id="startScreen">
 
-        <h2>
-            PAUSED
-        </h2>
+    <h1>OVERDRIVE</h1>
 
-        <p>
-            CLICK TO RETURN
-        </p>
-
+    <div class="subtitle">
+        COMBAT SYSTEM ONLINE
     </div>
 
-
-    <!-- DEATH -->
-
-    <div id="deathScreen">
-
-        <h2>
-            SYSTEM FAILURE
-        </h2>
-
-        <p>
-            CLICK TO RESTART
-        </p>
-
+    <div class="clickText">
+        CLICK TO ENTER
     </div>
 
+    <div class="controlsText">
+        WASD · MOUSE · SPACE · SHIFT · Q · 1 2 3 · R
+    </div>
 
-    <script type="module" src="game.js"></script>
+</div>
+
+
+<div id="pauseScreen">
+
+    <h2>PAUSED</h2>
+
+    <p>CLICK TO RETURN</p>
+
+</div>
+
+
+<div id="deathScreen">
+
+    <h2>SYSTEM FAILURE</h2>
+
+    <p>CLICK TO RESTART</p>
+
+</div>
+
+
+<script type="module" src="game.js"></script>
 
 </body>
 </html>

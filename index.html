@@ -1,190 +1,324 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OVERDRIVE</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVERDRIVE</title>
 
-<style>
-    * {
-        box-sizing: border-box;
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js"
+        }
     }
+    </script>
 
-    html, body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: #050505;
-        font-family: Arial, sans-serif;
-        user-select: none;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    #game {
-        width: 100%;
-        height: 100%;
-    }
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #050509;
+            font-family: Arial, Helvetica, sans-serif;
+            user-select: none;
+        }
 
-    #crosshair {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        width: 18px;
-        height: 18px;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 10;
-    }
+        #game {
+            width: 100vw;
+            height: 100vh;
+        }
 
-    #crosshair::before,
-    #crosshair::after {
-        content: "";
-        position: absolute;
-        background: #ffffff;
-        box-shadow: 0 0 8px #00ffff;
-    }
+        canvas {
+            display: block;
+        }
 
-    #crosshair::before {
-        width: 2px;
-        height: 18px;
-        left: 8px;
-        top: 0;
-    }
+        /* =========================
+           CROSSHAIR
+        ========================= */
 
-    #crosshair::after {
-        width: 18px;
-        height: 2px;
-        left: 0;
-        top: 8px;
-    }
+        #crosshair {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            width: 22px;
+            height: 22px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+        }
 
-    #hud {
-        position: fixed;
-        left: 25px;
-        bottom: 25px;
-        color: white;
-        z-index: 10;
-        pointer-events: none;
-    }
+        #crosshair::before,
+        #crosshair::after {
+            content: "";
+            position: absolute;
+            background: white;
+            box-shadow:
+                0 0 5px #00ffff,
+                0 0 12px #00ffff;
+        }
 
-    #health {
-        font-size: 28px;
-        font-weight: bold;
-        color: #ff304f;
-        text-shadow: 0 0 10px #ff304f;
-    }
+        #crosshair::before {
+            width: 2px;
+            height: 22px;
+            left: 10px;
+            top: 0;
+        }
 
-    #stamina {
-        margin-top: 8px;
-        width: 180px;
-        height: 7px;
-        background: #222;
-        border: 1px solid #555;
-    }
+        #crosshair::after {
+            width: 22px;
+            height: 2px;
+            left: 0;
+            top: 10px;
+        }
 
-    #staminaBar {
-        width: 100%;
-        height: 100%;
-        background: #00ffff;
-        box-shadow: 0 0 10px #00ffff;
-    }
+        /* =========================
+           HUD
+        ========================= */
 
-    #message {
-        position: fixed;
-        left: 50%;
-        top: 35%;
-        transform: translate(-50%, -50%);
-        color: white;
-        text-align: center;
-        z-index: 20;
-        pointer-events: none;
-    }
+        #hud {
+            position: fixed;
+            left: 25px;
+            bottom: 25px;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
+        }
 
-    #message h1 {
-        margin: 0;
-        font-size: 70px;
-        letter-spacing: 12px;
-        text-shadow:
-            0 0 10px #00ffff,
-            0 0 30px #0088ff;
-    }
+        #health {
+            font-size: 34px;
+            font-weight: 900;
+            color: #ff3155;
+            text-shadow:
+                0 0 8px #ff3155,
+                0 0 20px rgba(255, 0, 60, 0.5);
+        }
 
-    #message p {
-        margin-top: 15px;
-        color: #aaa;
-        letter-spacing: 3px;
-    }
+        #healthLabel {
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: #aaa;
+            margin-top: -5px;
+        }
 
-    #damage {
-        position: fixed;
-        inset: 0;
-        background: rgba(255, 0, 0, 0);
-        pointer-events: none;
-        z-index: 15;
-    }
-</style>
+        #staminaContainer {
+            margin-top: 12px;
+            width: 220px;
+            height: 8px;
+            background: #16161d;
+            border: 1px solid #444;
+        }
+
+        #staminaBar {
+            width: 100%;
+            height: 100%;
+            background: #00eaff;
+            box-shadow:
+                0 0 8px #00eaff,
+                0 0 18px rgba(0, 234, 255, 0.5);
+        }
+
+        /* =========================
+           START SCREEN
+        ========================= */
+
+        #startScreen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 50;
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(0, 100, 140, 0.16),
+                    rgba(0, 0, 0, 0.92) 65%
+                );
+            cursor: pointer;
+        }
+
+        #title {
+            margin: 0;
+            color: white;
+            font-size: clamp(55px, 10vw, 130px);
+            font-weight: 1000;
+            letter-spacing: 18px;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 30px #00aaff,
+                0 0 70px rgba(0, 150, 255, 0.7);
+        }
+
+        #subtitle {
+            margin-top: 12px;
+            color: #00eaff;
+            letter-spacing: 7px;
+            font-size: 13px;
+        }
+
+        #clickText {
+            margin-top: 55px;
+            color: white;
+            letter-spacing: 5px;
+            font-size: 14px;
+            animation: pulse 1.2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                opacity: 0.35;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* =========================
+           PAUSE
+        ========================= */
+
+        #pauseScreen {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 40;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+        }
+
+        #pauseScreen h2 {
+            color: white;
+            font-size: 50px;
+            letter-spacing: 10px;
+            margin: 0;
+        }
+
+        #pauseScreen p {
+            color: #888;
+            letter-spacing: 3px;
+        }
+
+        /* =========================
+           DAMAGE FLASH
+        ========================= */
+
+        #damageFlash {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 0, 30, 0);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* =========================
+           VIGNETTE
+        ========================= */
+
+        #vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+            background:
+                radial-gradient(
+                    circle,
+                    transparent 45%,
+                    rgba(0, 0, 0, 0.55) 100%
+                );
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="game"></div>
+    <div id="game"></div>
 
-<div id="crosshair"></div>
+    <div id="crosshair"></div>
 
-<div id="hud">
-    <div id="health">100</div>
-    <div id="stamina">
-        <div id="staminaBar"></div>
+    <div id="vignette"></div>
+
+    <div id="damageFlash"></div>
+
+    <div id="hud">
+        <div id="health">100</div>
+        <div id="healthLabel">INTEGRITY</div>
+
+        <div id="staminaContainer">
+            <div id="staminaBar"></div>
+        </div>
     </div>
-</div>
 
-<div id="damage"></div>
+    <div id="startScreen">
+        <h1 id="title">OVERDRIVE</h1>
+        <div id="subtitle">COMBAT SYSTEM ONLINE</div>
+        <div id="clickText">CLICK TO ENTER</div>
+    </div>
 
-<div id="message">
-    <h1>OVERDRIVE</h1>
-    <p>CLICK TO ENTER</p>
-</div>
+    <div id="pauseScreen">
+        <h2>PAUSED</h2>
+        <p>CLICK TO RETURN</p>
+    </div>
+
 
 <script type="module">
 
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js";
+import * as THREE from "three";
 
-import { PointerLockControls } from
-"https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/controls/PointerLockControls.js";
+import {
+    PointerLockControls
+} from "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/controls/PointerLockControls.js";
 
 
 // ============================================================
-// SETUP
+// GAME SETUP
 // ============================================================
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x050509);
+scene.background =
+    new THREE.Color(0x050509);
 
-scene.fog = new THREE.FogExp2(
-    0x050509,
-    0.035
-);
+scene.fog =
+    new THREE.FogExp2(
+        0x050509,
+        0.025
+    );
 
 
-const camera = new THREE.PerspectiveCamera(
-    90,
-    window.innerWidth / window.innerHeight,
-    0.05,
-    500
-);
+const camera =
+    new THREE.PerspectiveCamera(
+        90,
+        window.innerWidth / window.innerHeight,
+        0.05,
+        500
+    );
+
 
 camera.position.set(
     0,
     2,
-    10
+    15
 );
 
 
-const renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: "high-performance"
+    });
+
 
 renderer.setSize(
     window.innerWidth,
@@ -192,7 +326,10 @@ renderer.setSize(
 );
 
 renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio, 2)
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
 );
 
 renderer.shadowMap.enabled = true;
@@ -200,60 +337,83 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type =
     THREE.PCFSoftShadowMap;
 
+
+renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+
 document
     .getElementById("game")
     .appendChild(renderer.domElement);
 
 
 // ============================================================
+// POINTER LOCK
+// ============================================================
+
+const controls =
+    new PointerLockControls(
+        camera,
+        document.body
+    );
+
+
+// ============================================================
 // LIGHTING
 // ============================================================
 
-const ambient = new THREE.HemisphereLight(
-    0x6688ff,
-    0x080808,
-    1.2
-);
+const ambient =
+    new THREE.HemisphereLight(
+        0x6688ff,
+        0x080808,
+        1.5
+    );
 
 scene.add(ambient);
 
 
-const sun = new THREE.DirectionalLight(
-    0xffffff,
-    2
-);
+const sun =
+    new THREE.DirectionalLight(
+        0xffffff,
+        2
+    );
 
 sun.position.set(
     10,
-    20,
+    25,
     10
 );
 
 sun.castShadow = true;
 
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+
 scene.add(sun);
 
 
 // ============================================================
-// ARENA
+// FLOOR
 // ============================================================
 
 const floorMaterial =
     new THREE.MeshStandardMaterial({
         color: 0x101018,
-        roughness: 0.65,
-        metalness: 0.4
+        roughness: 0.6,
+        metalness: 0.5
     });
 
 
-const floor = new THREE.Mesh(
-    new THREE.BoxGeometry(
-        80,
-        1,
-        80
-    ),
-    floorMaterial
-);
+const floor =
+    new THREE.Mesh(
+        new THREE.BoxGeometry(
+            80,
+            1,
+            80
+        ),
+        floorMaterial
+    );
+
 
 floor.position.y = -0.5;
 
@@ -263,8 +423,11 @@ scene.add(floor);
 
 
 // ============================================================
-// WALL CREATOR
+// WALLS
 // ============================================================
+
+const collisionObjects = [];
+
 
 function createWall(
     x,
@@ -272,25 +435,27 @@ function createWall(
     z,
     width,
     height,
-    depth,
-    color = 0x161622
+    depth
 ) {
 
     const material =
         new THREE.MeshStandardMaterial({
-            color,
-            roughness: 0.5,
-            metalness: 0.7
+            color: 0x151520,
+            roughness: 0.45,
+            metalness: 0.75
         });
 
-    const wall = new THREE.Mesh(
-        new THREE.BoxGeometry(
-            width,
-            height,
-            depth
-        ),
-        material
-    );
+
+    const wall =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                width,
+                height,
+                depth
+            ),
+            material
+        );
+
 
     wall.position.set(
         x,
@@ -298,17 +463,19 @@ function createWall(
         z
     );
 
+
     wall.castShadow = true;
     wall.receiveShadow = true;
 
+
     scene.add(wall);
+
+    collisionObjects.push(wall);
 
     return wall;
 }
 
 
-// Arena walls
-
 createWall(
     0,
     5,
@@ -347,36 +514,37 @@ createWall(
 
 
 // ============================================================
-// ARENA STRUCTURES
+// ARENA BLOCKS
 // ============================================================
-
-const structures = [];
 
 function createBlock(
     x,
     y,
     z,
-    sx,
-    sy,
-    sz,
-    color
+    width,
+    height,
+    depth,
+    color = 0x202030
 ) {
 
     const material =
         new THREE.MeshStandardMaterial({
-            color,
-            metalness: 0.8,
-            roughness: 0.35
+            color: color,
+            roughness: 0.35,
+            metalness: 0.8
         });
 
-    const block = new THREE.Mesh(
-        new THREE.BoxGeometry(
-            sx,
-            sy,
-            sz
-        ),
-        material
-    );
+
+    const block =
+        new THREE.Mesh(
+            new THREE.BoxGeometry(
+                width,
+                height,
+                depth
+            ),
+            material
+        );
+
 
     block.position.set(
         x,
@@ -384,131 +552,56 @@ function createBlock(
         z
     );
 
+
     block.castShadow = true;
     block.receiveShadow = true;
 
+
     scene.add(block);
 
-    structures.push(block);
+    collisionObjects.push(block);
 
     return block;
 }
 
 
 createBlock(
-    -12,
+    -13,
     3,
     -10,
     8,
     6,
-    8,
-    0x202030
+    8
 );
 
+
 createBlock(
-    12,
+    13,
     3,
-    -15,
+    -14,
     8,
     6,
-    8,
-    0x202030
+    8
 );
+
 
 createBlock(
     -15,
     2,
-    12,
+    13,
     10,
     4,
-    6,
-    0x202030
+    6
 );
+
 
 createBlock(
     15,
     4,
-    15,
+    14,
     8,
     8,
-    8,
-    0x202030
-);
-
-
-// ============================================================
-// NEON LIGHTS
-// ============================================================
-
-function neonLight(
-    x,
-    y,
-    z,
-    color
-) {
-
-    const light =
-        new THREE.PointLight(
-            color,
-            15,
-            25
-        );
-
-    light.position.set(
-        x,
-        y,
-        z
-    );
-
-    scene.add(light);
-
-
-    const orb =
-        new THREE.Mesh(
-            new THREE.SphereGeometry(
-                0.15,
-                16,
-                16
-            ),
-            new THREE.MeshBasicMaterial({
-                color
-            })
-        );
-
-    orb.position.copy(
-        light.position
-    );
-
-    scene.add(orb);
-}
-
-
-neonLight(
-    -20,
-    5,
-    -20,
-    0x00ffff
-);
-
-neonLight(
-    20,
-    5,
-    -20,
-    0xff0066
-);
-
-neonLight(
-    -20,
-    5,
-    20,
-    0x6633ff
-);
-
-neonLight(
-    20,
-    5,
-    20,
-    0x00ffff
+    8
 );
 
 
@@ -524,21 +617,95 @@ const grid =
         0x202030
     );
 
+
 grid.position.y = 0.015;
 
 scene.add(grid);
 
 
 // ============================================================
-// PLAYER
+// NEON LIGHTS
 // ============================================================
 
-const controls =
-    new PointerLockControls(
-        camera,
-        document.body
+function createNeon(
+    x,
+    y,
+    z,
+    color
+) {
+
+    const light =
+        new THREE.PointLight(
+            color,
+            25,
+            28
+        );
+
+
+    light.position.set(
+        x,
+        y,
+        z
     );
 
+
+    scene.add(light);
+
+
+    const orb =
+        new THREE.Mesh(
+            new THREE.SphereGeometry(
+                0.18,
+                16,
+                16
+            ),
+            new THREE.MeshBasicMaterial({
+                color: color
+            })
+        );
+
+
+    orb.position.copy(
+        light.position
+    );
+
+
+    scene.add(orb);
+}
+
+
+createNeon(
+    -20,
+    5,
+    -20,
+    0x00ffff
+);
+
+createNeon(
+    20,
+    5,
+    -20,
+    0xff0066
+);
+
+createNeon(
+    -20,
+    5,
+    20,
+    0x6633ff
+);
+
+createNeon(
+    20,
+    5,
+    20,
+    0x00ffff
+);
+
+
+// ============================================================
+// PLAYER
+// ============================================================
 
 const player = {
 
@@ -547,27 +714,25 @@ const player = {
     velocity:
         new THREE.Vector3(),
 
-    direction:
-        new THREE.Vector3(),
+    moveSpeed: 20,
 
-    speed: 18,
+    sprintSpeed: 32,
 
-    sprintSpeed: 30,
+    jumpPower: 11,
 
-    jumpPower: 10,
-
-    dashPower: 45,
-
-    grounded: true,
+    dashPower: 42,
 
     health: 100,
 
     stamina: 100,
 
+    grounded: true,
+
     canDash: true,
 
-    dashCooldown: false
+    dashCooldown: false,
 
+    bobTime: 0
 };
 
 
@@ -581,11 +746,13 @@ camera.position.y =
 
 const keys = {};
 
+
 document.addEventListener(
     "keydown",
     event => {
 
         keys[event.code] = true;
+
 
         if (
             event.code === "Space" &&
@@ -600,28 +767,20 @@ document.addEventListener(
 
 
         if (
-            event.code === "ShiftLeft" ||
-            event.code === "ShiftRight"
-        ) {
-
-            if (
-                player.stamina > 0
-            ) {
-
-                player.stamina =
-                    Math.max(
-                        0,
-                        player.stamina - 2
-                    );
-            }
-        }
-
-
-        if (
             event.code === "KeyQ"
         ) {
 
             dash();
+        }
+
+
+        if (
+            event.code === "Escape"
+        ) {
+
+            if (controls.isLocked) {
+                controls.unlock();
+            }
         }
 
     }
@@ -639,31 +798,103 @@ document.addEventListener(
 
 
 // ============================================================
+// START GAME
+// ============================================================
+
+const startScreen =
+    document.getElementById(
+        "startScreen"
+    );
+
+
+const pauseScreen =
+    document.getElementById(
+        "pauseScreen"
+    );
+
+
+startScreen.addEventListener(
+    "click",
+    () => {
+
+        controls.lock();
+
+    }
+);
+
+
+controls.addEventListener(
+    "lock",
+    () => {
+
+        startScreen.style.display =
+            "none";
+
+        pauseScreen.style.display =
+            "none";
+
+    }
+);
+
+
+controls.addEventListener(
+    "unlock",
+    () => {
+
+        if (
+            player.health > 0
+        ) {
+
+            pauseScreen.style.display =
+                "flex";
+
+        }
+
+    }
+);
+
+
+pauseScreen.addEventListener(
+    "click",
+    () => {
+
+        controls.lock();
+
+    }
+);
+
+
+// ============================================================
 // DASH
 // ============================================================
 
 function dash() {
 
     if (
+        !controls.isLocked ||
         !player.canDash ||
         player.dashCooldown
-    ) return;
+    ) {
+        return;
+    }
 
 
-    const forward =
+    const direction =
         new THREE.Vector3();
 
+
     camera.getWorldDirection(
-        forward
+        direction
     );
 
-    forward.y = 0;
 
-    forward.normalize();
+    direction.y = 0;
+
+    direction.normalize();
 
 
     player.velocity.add(
-        forward.multiplyScalar(
+        direction.multiplyScalar(
             player.dashPower
         )
     );
@@ -674,65 +905,25 @@ function dash() {
     player.dashCooldown = true;
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
+            player.canDash = true;
+        },
+        650
+    );
 
-        player.canDash = true;
 
-    }, 800);
-
-
-    setTimeout(() => {
-
-        player.dashCooldown = false;
-
-    }, 250);
+    setTimeout(
+        () => {
+            player.dashCooldown = false;
+        },
+        200
+    );
 }
 
 
 // ============================================================
-// CLICK TO START
-// ============================================================
-
-document.addEventListener(
-    "click",
-    () => {
-
-        if (!controls.isLocked) {
-
-            controls.lock();
-
-        }
-
-    }
-);
-
-
-controls.addEventListener(
-    "lock",
-    () => {
-
-        document
-            .getElementById("message")
-            .style.display = "none";
-
-    }
-);
-
-
-controls.addEventListener(
-    "unlock",
-    () => {
-
-        document
-            .getElementById("message")
-            .style.display = "block";
-
-    }
-);
-
-
-// ============================================================
-// MOVEMENT
+// PLAYER MOVEMENT
 // ============================================================
 
 const clock =
@@ -766,29 +957,33 @@ function updatePlayer(
 
 
     const sprinting =
-        keys["ShiftLeft"] ||
-        keys["ShiftRight"];
+        (
+            keys["ShiftLeft"] ||
+            keys["ShiftRight"]
+        ) &&
+        player.stamina > 0 &&
+        moving;
 
 
     let speed =
         sprinting
             ? player.sprintSpeed
-            : player.speed;
+            : player.moveSpeed;
 
 
-    if (
-        sprinting &&
-        moving &&
-        player.stamina > 0
-    ) {
+    // -------------------------
+    // STAMINA
+    // -------------------------
+
+    if (sprinting) {
 
         player.stamina -=
-            30 * delta;
+            35 * delta;
 
     } else {
 
         player.stamina +=
-            20 * delta;
+            25 * delta;
 
     }
 
@@ -801,37 +996,29 @@ function updatePlayer(
         );
 
 
-    const direction =
-        player.direction;
+    // -------------------------
+    // DIRECTION
+    // -------------------------
 
-    direction.set(
-        right,
-        0,
-        -forward
-    );
-
-
-    if (direction.length() > 0)
-        direction.normalize();
-
-
-    const movement =
+    const forwardVector =
         new THREE.Vector3();
 
 
     camera.getWorldDirection(
-        movement
+        forwardVector
     );
 
-    movement.y = 0;
-    movement.normalize();
+
+    forwardVector.y = 0;
+
+    forwardVector.normalize();
 
 
-    const sideways =
+    const rightVector =
         new THREE.Vector3(
-            movement.z,
+            forwardVector.z,
             0,
-            -movement.x
+            -forwardVector.x
         );
 
 
@@ -840,55 +1027,83 @@ function updatePlayer(
 
 
     desired.addScaledVector(
-        movement,
+        forwardVector,
         forward
     );
 
+
     desired.addScaledVector(
-        sideways,
+        rightVector,
         right
     );
 
 
-    if (desired.length() > 0)
+    if (
+        desired.lengthSq() > 0
+    ) {
+
         desired.normalize();
 
+    }
+
+
+    // -------------------------
+    // ACCELERATION
+    // -------------------------
 
     const acceleration =
-        80 * delta;
+        95 * delta;
 
 
     player.velocity.x =
-        THREE.MathUtils.damp(
+        THREE.MathUtils.lerp(
             player.velocity.x,
             desired.x * speed,
-            8,
-            delta
+            Math.min(
+                1,
+                acceleration
+            )
         );
 
 
     player.velocity.z =
-        THREE.MathUtils.damp(
+        THREE.MathUtils.lerp(
             player.velocity.z,
             desired.z * speed,
-            8,
-            delta
+            Math.min(
+                1,
+                acceleration
+            )
         );
 
 
-    player.velocity.y -=
-        25 * delta;
+    // -------------------------
+    // GRAVITY
+    // -------------------------
 
+    player.velocity.y -=
+        28 * delta;
+
+
+    // -------------------------
+    // POSITION
+    // -------------------------
 
     camera.position.x +=
         player.velocity.x * delta;
 
-    camera.position.z +=
-        player.velocity.z * delta;
 
     camera.position.y +=
         player.velocity.y * delta;
 
+
+    camera.position.z +=
+        player.velocity.z * delta;
+
+
+    // -------------------------
+    // GROUND
+    // -------------------------
 
     if (
         camera.position.y <=
@@ -905,22 +1120,52 @@ function updatePlayer(
     }
 
 
-    // Arena boundaries
+    // -------------------------
+    // ARENA LIMITS
+    // -------------------------
 
     camera.position.x =
         THREE.MathUtils.clamp(
             camera.position.x,
-            -38,
-            38
+            -37,
+            37
         );
+
 
     camera.position.z =
         THREE.MathUtils.clamp(
             camera.position.z,
-            -38,
-            38
+            -37,
+            37
         );
 
+
+    // -------------------------
+    // WEAPON-STYLE CAMERA BOB
+    // -------------------------
+
+    if (
+        moving &&
+        player.grounded
+    ) {
+
+        player.bobTime +=
+            delta *
+            (sprinting ? 15 : 10);
+
+
+        camera.position.y =
+            player.height +
+            Math.sin(
+                player.bobTime
+            ) * 0.035;
+
+    }
+
+
+    // -------------------------
+    // HUD
+    // -------------------------
 
     document
         .getElementById(
@@ -935,9 +1180,6 @@ function updatePlayer(
 // SHOOTING
 // ============================================================
 
-let muzzleFlash = 0;
-
-
 document.addEventListener(
     "mousedown",
     event => {
@@ -945,7 +1187,9 @@ document.addEventListener(
         if (
             event.button !== 0 ||
             !controls.isLocked
-        ) return;
+        ) {
+            return;
+        }
 
 
         shoot();
@@ -956,7 +1200,12 @@ document.addEventListener(
 
 function shoot() {
 
-    muzzleFlash = 0.05;
+    // Small recoil
+
+    camera.rotation.x +=
+        THREE.MathUtils.degToRad(
+            0.7
+        );
 
 
     const origin =
@@ -977,29 +1226,77 @@ function shoot() {
             origin,
             direction,
             0,
-            100
+            150
         );
 
 
     const hits =
         raycaster.intersectObjects(
-            structures,
+            collisionObjects,
             false
         );
 
 
-    if (hits.length > 0) {
-
-        const hit =
-            hits[0];
-
+    if (
+        hits.length > 0
+    ) {
 
         createImpact(
-            hit.point
+            hits[0].point
         );
 
     }
 
+
+    createMuzzleFlash();
+
+}
+
+
+// ============================================================
+// MUZZLE FLASH
+// ============================================================
+
+function createMuzzleFlash() {
+
+    const flash =
+        new THREE.PointLight(
+            0xffaa44,
+            15,
+            8
+        );
+
+
+    flash.position.copy(
+        camera.position
+    );
+
+
+    const direction =
+        new THREE.Vector3();
+
+
+    camera.getWorldDirection(
+        direction
+    );
+
+
+    flash.position.add(
+        direction.multiplyScalar(
+            0.8
+        )
+    );
+
+
+    scene.add(flash);
+
+
+    setTimeout(
+        () => {
+            scene.remove(flash);
+        },
+        45
+    );
 }
 
 
@@ -1037,36 +1334,15 @@ function createImpact(
     );
 
 
-    scene.add(
-        impact
+    scene.add(impact);
+
+
+    setTimeout(
+        () => {
+            scene.remove(impact);
+        },
+        120
     );
-
-
-    setTimeout(() => {
-
-        scene.remove(
-            impact
-        );
-
-    }, 100);
-}
-
-
-// ============================================================
-// HUD
-// ============================================================
-
-function updateHUD() {
-
-    document
-        .getElementById(
-            "health"
-        )
-        .textContent =
-        Math.ceil(
-            player.health
-        );
-
 }
 
 
@@ -1082,7 +1358,9 @@ window.addEventListener(
             window.innerWidth /
             window.innerHeight;
 
+
         camera.updateProjectionMatrix();
+
 
         renderer.setSize(
             window.innerWidth,
@@ -1111,13 +1389,13 @@ function animate() {
         );
 
 
-    if (controls.isLocked) {
+    if (
+        controls.isLocked
+    ) {
 
         updatePlayer(
             delta
         );
-
-        updateHUD();
 
     }
 
@@ -1126,7 +1404,6 @@ function animate() {
         scene,
         camera
     );
-
 }
 
 

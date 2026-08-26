@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OVERDRIVE</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #050505;
+        font-family: Arial, sans-serif;
+        user-select: none;
+    }
+
+    #game {
+        width: 100%;
+        height: 100%;
+    }
+
+    #crosshair {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 18px;
+        height: 18px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #crosshair::before,
+    #crosshair::after {
+        content: "";
+        position: absolute;
+        background: #ffffff;
+        box-shadow: 0 0 8px #00ffff;
+    }
+
+    #crosshair::before {
+        width: 2px;
+        height: 18px;
+        left: 8px;
+        top: 0;
+    }
+
+    #crosshair::after {
+        width: 18px;
+        height: 2px;
+        left: 0;
+        top: 8px;
+    }
+
+    #hud {
+        position: fixed;
+        left: 25px;
+        bottom: 25px;
+        color: white;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    #health {
+        font-size: 28px;
+        font-weight: bold;
+        color: #ff304f;
+        text-shadow: 0 0 10px #ff304f;
+    }
+
+    #stamina {
+        margin-top: 8px;
+        width: 180px;
+        height: 7px;
+        background: #222;
+        border: 1px solid #555;
+    }
+
+    #staminaBar {
+        width: 100%;
+        height: 100%;
+        background: #00ffff;
+        box-shadow: 0 0 10px #00ffff;
+    }
+
+    #message {
+        position: fixed;
+        left: 50%;
+        top: 35%;
+        transform: translate(-50%, -50%);
+        color: white;
+        text-align: center;
+        z-index: 20;
+        pointer-events: none;
+    }
+
+    #message h1 {
+        margin: 0;
+        font-size: 70px;
+        letter-spacing: 12px;
+        text-shadow:
+            0 0 10px #00ffff,
+            0 0 30px #0088ff;
+    }
+
+    #message p {
+        margin-top: 15px;
+        color: #aaa;
+        letter-spacing: 3px;
+    }
+
+    #damage {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 0, 0, 0);
+        pointer-events: none;
+        z-index: 15;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="game"></div>
+
+<div id="crosshair"></div>
+
+<div id="hud">
+    <div id="health">100</div>
+    <div id="stamina">
+        <div id="staminaBar"></div>
+    </div>
+</div>
+
+<div id="damage"></div>
+
+<div id="message">
+    <h1>OVERDRIVE</h1>
+    <p>CLICK TO ENTER</p>
+</div>
+
+<script type="module">
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js";
+
+import { PointerLockControls } from
+"https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/controls/PointerLockControls.js";
+
+
+// ============================================================
+// SETUP
+// ============================================================
+
+const scene = new THREE.Scene();
+
+scene.background = new THREE.Color(0x050509);
+
+scene.fog = new THREE.FogExp2(
+    0x050509,
+    0.035
+);
+
+
+const camera = new THREE.PerspectiveCamera(
+    90,
+    window.innerWidth / window.innerHeight,
+    0.05,
+    500
+);
+
+camera.position.set(
+    0,
+    2,
+    10
+);
+
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
+});
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
+);
+
+renderer.shadowMap.enabled = true;
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+document
+    .getElementById("game")
+    .appendChild(renderer.domElement);
+
+
+// ============================================================
+// LIGHTING
+// ============================================================
+
+const ambient = new THREE.HemisphereLight(
+    0x6688ff,
+    0x080808,
+    1.2
+);
+
+scene.add(ambient);
+
+
+const sun = new THREE.DirectionalLight(
+    0xffffff,
+    2
+);
+
+sun.position.set(
+    10,
+    20,
+    10
+);
+
+sun.castShadow = true;
+
+scene.add(sun);
+
+
+// ============================================================
+// ARENA
+// ============================================================
+
+const floorMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x101018,
+        roughness: 0.65,
+        metalness: 0.4
+    });
+
+
+const floor = new THREE.Mesh(
+    new THREE.BoxGeometry(
+        80,
+        1,
+        80
+    ),
+    floorMaterial
+);
+
+floor.position.y = -0.5;
+
+floor.receiveShadow = true;
+
+scene.add(floor);
+
+
+// ============================================================
+// WALL CREATOR
+// ============================================================
+
+function createWall(
+    x,
+    y,
+    z,
+    width,
+    height,
+    depth,
+    color = 0x161622
+) {
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color,
+            roughness: 0.5,
+            metalness: 0.7
+        });
+
+    const wall = new THREE.Mesh(
+        new THREE.BoxGeometry(
+            width,
+            height,
+            depth
+        ),
+        material
+    );
+
+    wall.position.set(
+        x,
+        y,
+        z
+    );
+
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+
+    scene.add(wall);
+
+    return wall;
+}
+
+
+// Arena walls
+
+createWall(
+    0,
+    5,
+    -40,
+    80,
+    10,
+    2
+);
+
+createWall(
+    0,
+    5,
+    40,
+    80,
+    10,
+    2
+);
+
+createWall(
+    -40,
+    5,
+    0,
+    2,
+    10,
+    80
+);
+
+createWall(
+    40,
+    5,
+    0,
+    2,
+    10,
+    80
+);
+
+
+// ============================================================
+// ARENA STRUCTURES
+// ============================================================
+
+const structures = [];
+
+function createBlock(
+    x,
+    y,
+    z,
+    sx,
+    sy,
+    sz,
+    color
+) {
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color,
+            metalness: 0.8,
+            roughness: 0.35
+        });
+
+    const block = new THREE.Mesh(
+        new THREE.BoxGeometry(
+            sx,
+            sy,
+            sz
+        ),
+        material
+    );
+
+    block.position.set(
+        x,
+        y,
+        z
+    );
+
+    block.castShadow = true;
+    block.receiveShadow = true;
+
+    scene.add(block);
+
+    structures.push(block);
+
+    return block;
+}
+
+
+createBlock(
+    -12,
+    3,
+    -10,
+    8,
+    6,
+    8,
+    0x202030
+);
+
+createBlock(
+    12,
+    3,
+    -15,
+    8,
+    6,
+    8,
+    0x202030
+);
+
+createBlock(
+    -15,
+    2,
+    12,
+    10,
+    4,
+    6,
+    0x202030
+);
+
+createBlock(
+    15,
+    4,
+    15,
+    8,
+    8,
+    8,
+    0x202030
+);
+
+
+// ============================================================
+// NEON LIGHTS
+// ============================================================
+
+function neonLight(
+    x,
+    y,
+    z,
+    color
+) {
+
+    const light =
+        new THREE.PointLight(
+            color,
+            15,
+            25
+        );
+
+    light.position.set(
+        x,
+        y,
+        z
+    );
+
+    scene.add(light);
+
+
+    const orb =
+        new THREE.Mesh(
+            new THREE.SphereGeometry(
+                0.15,
+                16,
+                16
+            ),
+            new THREE.MeshBasicMaterial({
+                color
+            })
+        );
+
+    orb.position.copy(
+        light.position
+    );
+
+    scene.add(orb);
+}
+
+
+neonLight(
+    -20,
+    5,
+    -20,
+    0x00ffff
+);
+
+neonLight(
+    20,
+    5,
+    -20,
+    0xff0066
+);
+
+neonLight(
+    -20,
+    5,
+    20,
+    0x6633ff
+);
+
+neonLight(
+    20,
+    5,
+    20,
+    0x00ffff
+);
+
+
+// ============================================================
+// GRID
+// ============================================================
+
+const grid =
+    new THREE.GridHelper(
+        80,
+        80,
+        0x00ffff,
+        0x202030
+    );
+
+grid.position.y = 0.015;
+
+scene.add(grid);
+
+
+// ============================================================
+// PLAYER
+// ============================================================
+
+const controls =
+    new PointerLockControls(
+        camera,
+        document.body
+    );
+
+
+const player = {
+
+    height: 2,
+
+    velocity:
+        new THREE.Vector3(),
+
+    direction:
+        new THREE.Vector3(),
+
+    speed: 18,
+
+    sprintSpeed: 30,
+
+    jumpPower: 10,
+
+    dashPower: 45,
+
+    grounded: true,
+
+    health: 100,
+
+    stamina: 100,
+
+    canDash: true,
+
+    dashCooldown: false
+
+};
+
+
+camera.position.y =
+    player.height;
+
+
+// ============================================================
+// INPUT
+// ============================================================
+
+const keys = {};
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        keys[event.code] = true;
+
+        if (
+            event.code === "Space" &&
+            player.grounded
+        ) {
+
+            player.velocity.y =
+                player.jumpPower;
+
+            player.grounded = false;
+        }
+
+
+        if (
+            event.code === "ShiftLeft" ||
+            event.code === "ShiftRight"
+        ) {
+
+            if (
+                player.stamina > 0
+            ) {
+
+                player.stamina =
+                    Math.max(
+                        0,
+                        player.stamina - 2
+                    );
+            }
+        }
+
+
+        if (
+            event.code === "KeyQ"
+        ) {
+
+            dash();
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    event => {
+
+        keys[event.code] = false;
+
+    }
+);
+
+
+// ============================================================
+// DASH
+// ============================================================
+
+function dash() {
+
+    if (
+        !player.canDash ||
+        player.dashCooldown
+    ) return;
+
+
+    const forward =
+        new THREE.Vector3();
+
+    camera.getWorldDirection(
+        forward
+    );
+
+    forward.y = 0;
+
+    forward.normalize();
+
+
+    player.velocity.add(
+        forward.multiplyScalar(
+            player.dashPower
+        )
+    );
+
+
+    player.canDash = false;
+
+    player.dashCooldown = true;
+
+
+    setTimeout(() => {
+
+        player.canDash = true;
+
+    }, 800);
+
+
+    setTimeout(() => {
+
+        player.dashCooldown = false;
+
+    }, 250);
+}
+
+
+// ============================================================
+// CLICK TO START
+// ============================================================
+
+document.addEventListener(
+    "click",
+    () => {
+
+        if (!controls.isLocked) {
+
+            controls.lock();
+
+        }
+
+    }
+);
+
+
+controls.addEventListener(
+    "lock",
+    () => {
+
+        document
+            .getElementById("message")
+            .style.display = "none";
+
+    }
+);
+
+
+controls.addEventListener(
+    "unlock",
+    () => {
+
+        document
+            .getElementById("message")
+            .style.display = "block";
+
+    }
+);
+
+
+// ============================================================
+// MOVEMENT
+// ============================================================
+
+const clock =
+    new THREE.Clock();
+
+
+function updatePlayer(
+    delta
+) {
+
+    let forward = 0;
+    let right = 0;
+
+
+    if (keys["KeyW"])
+        forward += 1;
+
+    if (keys["KeyS"])
+        forward -= 1;
+
+    if (keys["KeyD"])
+        right += 1;
+
+    if (keys["KeyA"])
+        right -= 1;
+
+
+    const moving =
+        forward !== 0 ||
+        right !== 0;
+
+
+    const sprinting =
+        keys["ShiftLeft"] ||
+        keys["ShiftRight"];
+
+
+    let speed =
+        sprinting
+            ? player.sprintSpeed
+            : player.speed;
+
+
+    if (
+        sprinting &&
+        moving &&
+        player.stamina > 0
+    ) {
+
+        player.stamina -=
+            30 * delta;
+
+    } else {
+
+        player.stamina +=
+            20 * delta;
+
+    }
+
+
+    player.stamina =
+        THREE.MathUtils.clamp(
+            player.stamina,
+            0,
+            100
+        );
+
+
+    const direction =
+        player.direction;
+
+    direction.set(
+        right,
+        0,
+        -forward
+    );
+
+
+    if (direction.length() > 0)
+        direction.normalize();
+
+
+    const movement =
+        new THREE.Vector3();
+
+
+    camera.getWorldDirection(
+        movement
+    );
+
+    movement.y = 0;
+    movement.normalize();
+
+
+    const sideways =
+        new THREE.Vector3(
+            movement.z,
+            0,
+            -movement.x
+        );
+
+
+    const desired =
+        new THREE.Vector3();
+
+
+    desired.addScaledVector(
+        movement,
+        forward
+    );
+
+    desired.addScaledVector(
+        sideways,
+        right
+    );
+
+
+    if (desired.length() > 0)
+        desired.normalize();
+
+
+    const acceleration =
+        80 * delta;
+
+
+    player.velocity.x =
+        THREE.MathUtils.damp(
+            player.velocity.x,
+            desired.x * speed,
+            8,
+            delta
+        );
+
+
+    player.velocity.z =
+        THREE.MathUtils.damp(
+            player.velocity.z,
+            desired.z * speed,
+            8,
+            delta
+        );
+
+
+    player.velocity.y -=
+        25 * delta;
+
+
+    camera.position.x +=
+        player.velocity.x * delta;
+
+    camera.position.z +=
+        player.velocity.z * delta;
+
+    camera.position.y +=
+        player.velocity.y * delta;
+
+
+    if (
+        camera.position.y <=
+        player.height
+    ) {
+
+        camera.position.y =
+            player.height;
+
+        player.velocity.y = 0;
+
+        player.grounded = true;
+
+    }
+
+
+    // Arena boundaries
+
+    camera.position.x =
+        THREE.MathUtils.clamp(
+            camera.position.x,
+            -38,
+            38
+        );
+
+    camera.position.z =
+        THREE.MathUtils.clamp(
+            camera.position.z,
+            -38,
+            38
+        );
+
+
+    document
+        .getElementById(
+            "staminaBar"
+        )
+        .style.width =
+        player.stamina + "%";
+}
+
+
+// ============================================================
+// SHOOTING
+// ============================================================
+
+let muzzleFlash = 0;
+
+
+document.addEventListener(
+    "mousedown",
+    event => {
+
+        if (
+            event.button !== 0 ||
+            !controls.isLocked
+        ) return;
+
+
+        shoot();
+
+    }
+);
+
+
+function shoot() {
+
+    muzzleFlash = 0.05;
+
+
+    const origin =
+        camera.position.clone();
+
+
+    const direction =
+        new THREE.Vector3();
+
+
+    camera.getWorldDirection(
+        direction
+    );
+
+
+    const raycaster =
+        new THREE.Raycaster(
+            origin,
+            direction,
+            0,
+            100
+        );
+
+
+    const hits =
+        raycaster.intersectObjects(
+            structures,
+            false
+        );
+
+
+    if (hits.length > 0) {
+
+        const hit =
+            hits[0];
+
+
+        createImpact(
+            hit.point
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// BULLET IMPACT
+// ============================================================
+
+function createImpact(
+    position
+) {
+
+    const geometry =
+        new THREE.SphereGeometry(
+            0.08,
+            8,
+            8
+        );
+
+
+    const material =
+        new THREE.MeshBasicMaterial({
+            color: 0xffaa00
+        });
+
+
+    const impact =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    impact.position.copy(
+        position
+    );
+
+
+    scene.add(
+        impact
+    );
+
+
+    setTimeout(() => {
+
+        scene.remove(
+            impact
+        );
+
+    }, 100);
+}
+
+
+// ============================================================
+// HUD
+// ============================================================
+
+function updateHUD() {
+
+    document
+        .getElementById(
+            "health"
+        )
+        .textContent =
+        Math.ceil(
+            player.health
+        );
+
+}
+
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    const delta =
+        Math.min(
+            clock.getDelta(),
+            0.05
+        );
+
+
+    if (controls.isLocked) {
+
+        updatePlayer(
+            delta
+        );
+
+        updateHUD();
+
+    }
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+animate();
+
+</script>
+
+</body>
+</html>
